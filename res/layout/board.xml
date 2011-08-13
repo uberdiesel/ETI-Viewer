@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<item-array
+	xmlns:greendroid="http://schemas.android.com/apk/res/com.android.luelinksviewer">
+		
+		<separator-item
+			greendroid:text="Social Boards" />
+		<subtext-item
+			greendroid:text="Life,the Universe, and Everything "
+        	greendroid:subtext="Discussion of everything"
+        	greendroid:enabled="true" />
+		<subtext-item
+			greendroid:text="Pipe Mania"
+        	greendroid:subtext="Understanding drugs and their effects. No illegal activity (ie, buying / selling) allowed." 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Humans Anonymous"
+        	greendroid:subtext="Where no one has a face "  
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Mostly Harmless"
+        	greendroid:subtext="The troll and fad free zone "  
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Strong Homo"
+        	greendroid:subtext="The balls are definitely touching "  
+        	greendroid:enabled="true" />
+        <separator-item
+			greendroid:text="Topical Discussion Boards"/>
+		<subtext-item
+			greendroid:text="Fitness"
+        	greendroid:subtext="Weight Loss, Muscle Gain, Nutrition, and Exercise Board " 
+        	greendroid:enabled="true" />
+		<subtext-item
+			greendroid:text="LUE++"
+        	greendroid:subtext="Hello, world!" 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Starcraft"
+        	greendroid:subtext="Starcraft" 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Relation Ship"
+        	greendroid:subtext="Set sail for heartbreak " 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Music"
+        	greendroid:subtext="The food of love " 
+        	greendroid:enabled="true" />
+		<separator-item
+			greendroid:text="Site Boards" />
+		<subtext-item
+			greendroid:text="Requests"
+        	greendroid:subtext="Want something we don\'t have? Post here " 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Complaints Department"
+        	greendroid:subtext="Post complaints about vote spamming or rule infractions here " 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="LL Mart"
+        	greendroid:subtext="Board for buying/selling, wheeling and dealing with your fellow LLers. Caveat emptor! " 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Referral Mania"
+        	greendroid:subtext="The land of broken dreams" 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Suicide"
+        	greendroid:subtext="POSTING ON THIS BOARD WILL GET YOU SUSPENDED. NOT JOKING " 
+        	greendroid:enabled="true" />
+       	<subtext-item
+			greendroid:text="Site Suggestions"
+        	greendroid:subtext="Feel free to post any ideas you have " 
+        	greendroid:enabled="true" />
+</item-array>
+

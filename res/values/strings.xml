@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">You have reached the end of the internet. Go away. Or login. I\'m a textview, not a cop.</string>
+    <string name="app_name">Luelinks Viewer</string>
+    
+    <!-- Main View List Names -->
+    <string name="board_list">Board List</string>
+    <string name="topicsofmoment">Topics of the Moment</string>
+    <string name="posted_messages">Posted Messages</string>
+    <string name="tagged_topics">Tagged Topics</string>
+    <string name="drama_links">Drama Links</string>
+    <string name="private_messages">Private Messages</string>
+    <string name="poll">Poll of the Day</string>
+    <string name="profile">Profile</string>
+    
+    <!-- Board List URI -->
+    <string name="boards">http://boards.endoftheinter.net/boardlist.php</string>
+    
+    <!-- Specialty Board URIs -->
+    <string name="moment_uri">http://boards.endoftheinter.net/main.php</string>
+    <string name="tagged_uri">https://boards.endoftheinter.net/showfavorites.php</string>
+    <string name="postedt_uri">https://boards.endoftheinter.net/history.php</string>
+    
+    <!-- Board Names / IDs-->
+    <string-array name="boardlist">
+		<item>Life, The Universe, and Everything</item>
+        <item>Pipe Mania</item>
+        <item>Humans Anonymous</item>
+        <item>Mostly Harmless</item>
+        <item>Strong Homo</item>
+        <item>Fitness</item>
+        <item>Lue++</item>
+        <item>Starcraft</item>
+        <item>Relation Ship</item>
+        <item>Music</item>
+        <item>Requests</item>
+        <item>Complaints Department</item>
+        <item>LL Mart</item>
+        <item>Referral Mania</item>
+        <item>Suicide</item>
+        <item>Site Suggestions</item>
+    </string-array>
+        <string-array name="boardsubtext">
+		<item>Discussion of everything </item>
+        <item>Understanding drugs and their effects. No illegal activity (ie, buying / selling) allowed.</item>
+        <item>Where no one has a face</item>
+        <item>The troll and fad free zone</item>
+        <item>The balls are definitely touching</item>
+        <item>Weight Loss, Muscle Gain, Nutrition, and Exercise Board</item>
+        <item>Hello, world!</item>
+        <item>Starcraft</item>
+        <item>Set sail for heartbreak</item>
+        <item>The food of love</item>
+        <item>Want something we don\'t have? Post here</item>
+        <item>Post complaints about vote spamming or rule infractions here</item>
+        <item>Board for buying/selling, wheeling and dealing with your fellow LLers. Caveat emptor!</item>
+        <item>The land of broken dreams</item>
+        <item>POSTING ON THIS BOARD WILL GET YOU SUSPENDED. NOT JOKING</item>
+        <item>Feel free to post any ideas you have here</item>
+    </string-array>
+    <string-array name="boardvalues">
+    	<item>http://boards.endoftheinter.net/showtopics.php?board=4242</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4251</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=42444</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4258</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4277</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4273</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4247</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=425749</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4274</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4275</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4278</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4256</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=42419</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4254494</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4257</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=4245</item>
+    </string-array>
+</resources>
