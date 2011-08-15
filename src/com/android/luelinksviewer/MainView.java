@@ -19,7 +19,6 @@ public class MainView extends GDListActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        	//
         LueApp = (LuelinksViewer)getApplicationContext();
         setTitle("Main View");
         ItemAdapter adapter = new ItemAdapter(this);
@@ -42,10 +41,10 @@ public class MainView extends GDListActivity {
         final TextItem textItem = new TextItem(getString(stringId));
         return textItem;
     }
-	 protected void onListItemClick(ListView l, View v, int position, long id) {
-		 Intent myIntent;
-		 Bundle b;
-		 //TODO: Add each item's respective activity and link to said activity.
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Intent myIntent;
+		Bundle b;
+		//TODO: Add each item's respective activity and link to said activity.
         switch (position) {
 	 		case 0:
 	 			myIntent = new Intent(this, BoardList.class);
@@ -54,7 +53,9 @@ public class MainView extends GDListActivity {
 	 		case 1:
 	 			myIntent = new Intent(this, TopicList.class);
 				b = new Bundle();
-				b.putString("URL",getString(R.string.topicsofmoment));
+				b.putString("URL",getString(R.string.moment_uri));
+				b.putBoolean("postable", false);
+				Log.v(LOG, getString(R.string.moment_uri)); 
 				myIntent.putExtras(b);
 				startActivity(myIntent);
 	 			break;
@@ -65,6 +66,7 @@ public class MainView extends GDListActivity {
 	 			myIntent = new Intent(this, TopicList.class);
 				b = new Bundle();
 				b.putString("URL",getString(R.string.tagged_uri));
+				b.putBoolean("postable", false);
 				myIntent.putExtras(b);
 				startActivity(myIntent);
 	 			break;

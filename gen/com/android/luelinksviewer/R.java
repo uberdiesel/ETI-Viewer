@@ -677,8 +677,10 @@ containing a value of this type.
         public static final int gd_tab_indicator_unselected=0x7f020047;
         public static final int ic_action_settings=0x7f020048;
         public static final int icon=0x7f020049;
+        public static final int postcount=0x7f02004a;
     }
     public static final class id {
+        public static final int Boardview=0x7f05002f;
         public static final int action_view_settings=0x7f050015;
         public static final int bottom=0x7f050008;
         public static final int center=0x7f05000d;
@@ -725,9 +727,9 @@ containing a value of this type.
         public static final int right=0x7f05000a;
         public static final int single=0x7f05000e;
         public static final int top=0x7f050007;
-        public static final int topiccount=0x7f050031;
-        public static final int topicposter=0x7f050030;
-        public static final int topictitle=0x7f05002f;
+        public static final int topiccount=0x7f050032;
+        public static final int topicposter=0x7f050031;
+        public static final int topictitle=0x7f050030;
         public static final int xhdpi=0x7f050006;
     }
     public static final class layout {
@@ -765,6 +767,8 @@ containing a value of this type.
         public static final int login=0x7f03001f;
         public static final int main=0x7f030020;
         public static final int topiclist=0x7f030021;
+        public static final int topicrow=0x7f030022;
+        public static final int topictable=0x7f030023;
     }
     public static final class string {
         public static final int app_name=0x7f08001c;

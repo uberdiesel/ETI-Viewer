@@ -18,7 +18,7 @@ public class BoardList extends GDListActivity{
         setTitle("Board List");
 	    boardvalues = getResources().getStringArray(R.array.boardvalues);
 	    try {
-			adapter = ItemAdapter.createFromXml(this, R.layout.topiclist);
+			adapter = ItemAdapter.createFromXml(this, R.layout.board);
 		} 
 	    catch (Exception e) {
 			e.printStackTrace();
@@ -38,6 +38,7 @@ public class BoardList extends GDListActivity{
 			boardid = boardid-1;
 		
 		b.putString("URL",boardvalues[boardid]);
+		b.putBoolean("postable", true);
 		myIntent.putExtras(b);
 		startActivity(myIntent);
 	}

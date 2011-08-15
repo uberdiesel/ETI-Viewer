@@ -59,21 +59,21 @@
         <item>Feel free to post any ideas you have here</item>
     </string-array>
     <string-array name="boardvalues">
-    	<item>http://boards.endoftheinter.net/showtopics.php?board=4242</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4251</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=42444</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4258</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4277</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4273</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4247</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=425749</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4274</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4275</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4278</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4256</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=42419</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4254494</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4257</item>
-        <item>http://boards.endoftheinter.net/showtopics.php?board=4245</item>
+    	<item>http://boards.endoftheinter.net/showtopics.php?board=42</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=51</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=444</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=58</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=77</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=73</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=47</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=5749</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=74</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=75</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=78</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=56</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=419</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=54494</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=57</item>
+        <item>http://boards.endoftheinter.net/showtopics.php?board=45</item>
     </string-array>
 </resources>

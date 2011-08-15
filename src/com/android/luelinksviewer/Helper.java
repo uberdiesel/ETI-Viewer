@@ -1,6 +1,10 @@
 package com.android.luelinksviewer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +12,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import android.util.Log;
 
@@ -24,7 +33,7 @@ public class Helper {
 	static String LOG = "Helper";
 	
 	public static boolean Login(String username, String password) throws IOException {
-		HttpPost post = new HttpPost("https://iphone.endoftheinter.net/#___1__");
+		HttpPost post = new HttpPost("http://iphone.endoftheinter.net/#___1__");
 		
 		// Add your data
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -67,11 +76,92 @@ public class Helper {
 			return false;
 		}
 	}
-	public Topic ParseTopic(String Address) {
-		Topic topic = new Topic();
-		
-		
-		return topic;
+	
+	private static String GetPage (String Address) throws URISyntaxException {
+		BufferedReader in = null;
+		String HTMLSource = null;
+		try {
+			HttpGet request = new HttpGet();
+			request.setURI(new URI(Address));
+            HttpResponse response = client.execute(request);
+            in = new BufferedReader
+            (new InputStreamReader(response.getEntity().getContent()));
+            StringBuffer sb = new StringBuffer("");
+            String line = "";
+            String NL = System.getProperty("line.separator");
+            while ((line = in.readLine()) != null) {
+                sb.	append(line + NL);
+            }
+            in.close();
+            HTMLSource = sb.toString();
+            
+            }
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+            if (in != null) {
+            	try {
+            		in.close();
+                } catch (IOException e) {
+                	e.printStackTrace();
+                }
+            }
+        }
+		return HTMLSource;
 	}
-
+	
+	public ArrayList<Topic> ParseTopics(String Address) throws URISyntaxException {
+		ArrayList<Topic> TopicList = new ArrayList<Topic>();
+		//Declare Variables
+		String html, extraURL;
+		Document doc;
+		
+		//Initiate Variables
+		extraURL = "//boards.endoftheinter.net";
+		html = GetPage(Address);
+		doc = Jsoup.parse(html);
+		
+		Elements topicList = doc.select("table").select("tr");
+		topicList.remove(0);
+		for (Element td : topicList){
+			Topic topicdata = new Topic();
+			
+			topicdata.setAddress(td.select("a").eq(0).attr("href").replace(extraURL, ""));
+			topicdata.setTitle(td.select("a").eq(0).text());
+			if(td.select("b").eq(0).hasText()) {
+				topicdata.setisSticky(true);
+			}
+				
+			//topic.put("author_link", td.select("a").eq(1).attr("href").replace(extraURL, ""));
+			topicdata.setPoster(td.select("a").eq(1).text());
+			
+			topicdata.setPostcount(td.select("td").eq(2).text());
+			
+			
+			String split = "[ ]+";
+	    	String[] splitpostcount = td.select("td").eq(2).text().split(split);
+	    	topicdata.setPostcount(splitpostcount[0]);
+	    	
+	    	
+	    	//Add bookmarking
+	    	if (splitpostcount.length > 1) {
+	    		int startsplit = splitpostcount[1].lastIndexOf("+") + 1;
+	    		int endsplit = splitpostcount[1].lastIndexOf(")");
+	    		String bookmarkcount = splitpostcount[1].substring(startsplit, endsplit);
+	    		topicdata.setPostBookmark(bookmarkcount); // Add number of "new" messages
+	    		topicdata.setisBookmark(true);
+	    		
+	    		//Set new address for topic
+	    		int posts = Integer.parseInt(splitpostcount[0]);
+	    		int newposts = Integer.parseInt(bookmarkcount);
+	    		if((posts-newposts) > 50) {
+	    			int page = (((posts-newposts) + 49) / 50 );
+	    			topicdata.setPage(page);
+	    		}
+	    	}
+		TopicList.add(topicdata);
+		}
+		return TopicList;
+	}
 }

@@ -104,7 +104,7 @@ public class LuelinksViewer extends GDApplication {
 			Date date = new Date(cookies.getLong("PHPSESSID" + "EXPIRY", 0));
 			c.setExpiryDate(date);
 		}catch (NullPointerException e){
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		Log.v("Restore Cookie", c.toString());
@@ -118,7 +118,7 @@ public class LuelinksViewer extends GDApplication {
 			Date date = new Date(cookies.getLong("userid" + "EXPIRY", 0));
 			c.setExpiryDate(date);
 		}catch (NullPointerException e){
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		Log.v("Restore Cookie", c.toString());
@@ -133,7 +133,7 @@ public class LuelinksViewer extends GDApplication {
 			Date date = new Date(cookies.getLong("session" + "EXPIRY", 0));
 			c.setExpiryDate(date);
 		}catch (NullPointerException e){
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		

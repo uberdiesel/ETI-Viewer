@@ -1,30 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:background="#dde3eb"
-	android:paddingLeft="5dp"
-	android:orientation="vertical"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<TextView android:id="@+id/topictitle"
-		android:textSize="11sp"
-  		android:textStyle="bold"
-  		android:textColor="#4b73aa"
-  		android:layout_width="wrap_content"
-  		android:layout_height="wrap_content"/>
-	<TextView android:id="@+id/topicposter"
-		android:textSize="10sp"
-		android:textColor="#000000"
-		android:paddingLeft="10dp"
-		android:layout_below="@+id/topictitle"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
-	<TextView android:id="@+id/topiccount"
-		android:textStyle="italic"
-		android:textSize="8sp"
-		android:textColor="#000000"
-		android:paddingRight="10dp"
-		android:layout_alignParentRight="true"
-		android:layout_below="@+id/topictitle"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
-</RelativeLayout>
+<?xml version="1.0" encoding="utf-8"?>
+<greendroid.widget.ActionBarHost
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@id/gd_action_bar_host"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical">
+<greendroid.widget.ActionBar
+android:id="@id/gd_action_bar"
+android:layout_height="@dimen/gd_action_bar_height"
+android:layout_width="fill_parent"
+android:background="?attr/gdActionBarBackground" />
+<FrameLayout
+android:id="@id/gd_action_bar_content_view"
+android:layout_height="0dp"
+android:layout_width="fill_parent"
+android:layout_weight="1">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:orientation="vertical"
+ android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+  <ListView
+   android:id="@+id/Boardview"
+   android:layout_height="wrap_content"
+   android:layout_width="fill_parent"/>
+</LinearLayout>
+</FrameLayout>
+</greendroid.widget.ActionBarHost>
