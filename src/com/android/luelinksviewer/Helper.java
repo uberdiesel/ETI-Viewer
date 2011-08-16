@@ -8,12 +8,17 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.AbstractVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -31,10 +36,9 @@ public class Helper {
 	static String page = "&page=";
 	static String postTopic = "http://boards.endoftheinter.net/postmsg.php?board=";
 	static String LOG = "Helper";
-	
+
 	public static boolean Login(String username, String password) throws IOException {
 		HttpPost post = new HttpPost("http://iphone.endoftheinter.net/#___1__");
-		
 		// Add your data
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("username", username));
@@ -83,6 +87,7 @@ public class Helper {
 		try {
 			HttpGet request = new HttpGet();
 			request.setURI(new URI(Address));
+			
             HttpResponse response = client.execute(request);
             in = new BufferedReader
             (new InputStreamReader(response.getEntity().getContent()));
@@ -98,6 +103,8 @@ public class Helper {
             }
 		catch (IOException e) {
 			e.printStackTrace();
+			client = getTolerantClient();
+			GetPage(Address);
 		}
 		finally {
             if (in != null) {
@@ -109,6 +116,19 @@ public class Helper {
             }
         }
 		return HTMLSource;
+	}
+	
+	public int GetPageCount (String Address) throws URISyntaxException {
+		//Declare Variables
+		Document doc;
+		String html;
+		
+		//Initiate Variables
+		html = GetPage(Address);
+		doc = Jsoup.parse(html);
+		Element pagecount = doc.select("div.infobar").first().select("span").first();
+		Log.v(LOG, "Pagecount: " + pagecount.text());
+		return Integer.parseInt(pagecount.text());
 	}
 	
 	public ArrayList<Topic> ParseTopics(String Address) throws URISyntaxException {
@@ -164,4 +184,43 @@ public class Helper {
 		}
 		return TopicList;
 	}
+	public static DefaultHttpClient getTolerantClient() {
+	    DefaultHttpClient client = new DefaultHttpClient();
+	    SSLSocketFactory sslSocketFactory = (SSLSocketFactory) client
+	            .getConnectionManager().getSchemeRegistry().getScheme("https")
+	            .getSocketFactory();
+	    final X509HostnameVerifier delegate = sslSocketFactory.getHostnameVerifier();
+	    if(!(delegate instanceof MyVerifier)) {
+	        sslSocketFactory.setHostnameVerifier(new MyVerifier(delegate));
+	    }
+	    return client;
+	}
+}
+class MyVerifier extends AbstractVerifier {
+
+    private final X509HostnameVerifier delegate;
+
+    public MyVerifier(final X509HostnameVerifier delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public void verify(String host, String[] cns, String[] subjectAlts)
+                throws SSLException {
+        boolean ok = false;
+        try {
+            delegate.verify(host, cns, subjectAlts);
+        } catch (SSLException e) {
+            for (String cn : cns) {
+                if (cn.startsWith("*.")) {
+                    try {
+                          delegate.verify(host, new String[] { 
+                                cn.substring(2) }, subjectAlts);
+                          ok = true;
+                    } catch (Exception e1) { }
+                }
+            }
+            if(!ok) throw e;
+        }
+    }
 }

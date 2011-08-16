@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 public class MainView extends GDListActivity {
 	LuelinksViewer LueApp;
+	
 	static String LOG = "MainView";
 
 	@Override
@@ -55,6 +56,7 @@ public class MainView extends GDListActivity {
 				b = new Bundle();
 				b.putString("URL",getString(R.string.moment_uri));
 				b.putBoolean("postable", false);
+				b.putBoolean("ToM", true);
 				Log.v(LOG, getString(R.string.moment_uri)); 
 				myIntent.putExtras(b);
 				startActivity(myIntent);
@@ -67,6 +69,7 @@ public class MainView extends GDListActivity {
 				b = new Bundle();
 				b.putString("URL",getString(R.string.tagged_uri));
 				b.putBoolean("postable", false);
+				b.putInt("page", 1);
 				myIntent.putExtras(b);
 				startActivity(myIntent);
 	 			break;

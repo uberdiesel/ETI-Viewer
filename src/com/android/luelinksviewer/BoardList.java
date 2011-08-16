@@ -28,7 +28,7 @@ public class BoardList extends GDListActivity{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		int boardid = position;
 		Intent myIntent = new Intent(this, TopicList.class);
-		Bundle b = new Bundle();;
+		Bundle b = new Bundle();
 		
 		//set boardid and remove the separater items
 		boardid = boardid - 1;
@@ -39,6 +39,7 @@ public class BoardList extends GDListActivity{
 		
 		b.putString("URL",boardvalues[boardid]);
 		b.putBoolean("postable", true);
+		b.putInt("page", 1);
 		myIntent.putExtras(b);
 		startActivity(myIntent);
 	}

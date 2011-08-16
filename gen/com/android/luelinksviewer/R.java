@@ -675,9 +675,11 @@ containing a value of this type.
         public static final int gd_tab_indicator_pressed=0x7f020045;
         public static final int gd_tab_indicator_selected=0x7f020046;
         public static final int gd_tab_indicator_unselected=0x7f020047;
-        public static final int ic_action_settings=0x7f020048;
-        public static final int icon=0x7f020049;
-        public static final int postcount=0x7f02004a;
+        public static final int ic_action_backarrow=0x7f020048;
+        public static final int ic_action_nextarrow=0x7f020049;
+        public static final int ic_action_settings=0x7f02004a;
+        public static final int icon=0x7f02004b;
+        public static final int postcount=0x7f02004c;
     }
     public static final class id {
         public static final int Boardview=0x7f05002f;
@@ -774,11 +776,11 @@ containing a value of this type.
         public static final int app_name=0x7f08001c;
         /**  Main View List Names 
          */
-        public static final int board_list=0x7f08001d;
+        public static final int board_list=0x7f080021;
         /**  Board List URI 
          */
-        public static final int boards=0x7f080025;
-        public static final int drama_links=0x7f080021;
+        public static final int boards=0x7f08002b;
+        public static final int drama_links=0x7f080027;
         public static final int gd_add=0x7f08000b;
         public static final int gd_all_friends=0x7f080016;
         public static final int gd_compass=0x7f08000f;
@@ -806,18 +808,26 @@ containing a value of this type.
         public static final int gd_take_photo=0x7f080007;
         public static final int gd_talk=0x7f080002;
         public static final int gd_trashcan=0x7f080014;
+        public static final int goto_page=0x7f080020;
         public static final int hello=0x7f08001b;
         /**  Specialty Board URIs 
          */
-        public static final int moment_uri=0x7f080026;
-        public static final int poll=0x7f080023;
-        public static final int posted_messages=0x7f08001f;
-        public static final int postedt_uri=0x7f080028;
-        public static final int private_messages=0x7f080022;
-        public static final int profile=0x7f080024;
-        public static final int tagged_topics=0x7f080020;
-        public static final int tagged_uri=0x7f080027;
-        public static final int topicsofmoment=0x7f08001e;
+        public static final int moment_uri=0x7f08002c;
+        public static final int next_page=0x7f08001e;
+        public static final int poll=0x7f080029;
+        /**  Topic List Action Menu IDs 
+         */
+        public static final int post_topic=0x7f08001d;
+        public static final int posted_messages=0x7f080025;
+        public static final int postedt_uri=0x7f08002e;
+        public static final int previous_page=0x7f08001f;
+        public static final int private_messages=0x7f080028;
+        public static final int profile=0x7f08002a;
+        public static final int refresh=0x7f080022;
+        public static final int search=0x7f080023;
+        public static final int tagged_topics=0x7f080026;
+        public static final int tagged_uri=0x7f08002d;
+        public static final int topicsofmoment=0x7f080024;
     }
     public static final class style {
         public static final int GreenDroid=0x7f090006;

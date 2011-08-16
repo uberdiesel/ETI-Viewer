@@ -2,6 +2,7 @@ package com.android.luelinksviewer;
 
 import greendroid.app.GDApplication;
 
+import java.net.URISyntaxException;
 import java.sql.Date;
 import java.util.List;
 
@@ -50,6 +51,10 @@ public class LuelinksViewer extends GDApplication {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}
+		
+		//Test cookies. If exception thrown, relogin
+		
+
 	}
 	public void onLowMemory() {
 		super.onLowMemory();
@@ -151,6 +156,7 @@ public class LuelinksViewer extends GDApplication {
 	}
 
 	public void clearCookies() {
+		Log.v("Helper", "CLEARED OUT THOSE BITCH");
 		cookie_editor.clear();
 		cookie_editor.commit();
 	}

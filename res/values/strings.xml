@@ -3,6 +3,15 @@
     <string name="hello">You have reached the end of the internet. Go away. Or login. I\'m a textview, not a cop.</string>
     <string name="app_name">Luelinks Viewer</string>
     
+    <!-- Topic List Action Menu IDs -->
+    <string name="post_topic">Post Topic</string>
+    <string name="next_page">Next Page</string>
+    <string name="previous_page">Previous Page</string>
+    <string name="goto_page">Go to Page</string>
+    <string name="board_list">Board List</string>
+    <string name="refresh">Refresh</string>
+    <string name="search">Search</string>
+    
     <!-- Main View List Names -->
     <string name="board_list">Board List</string>
     <string name="topicsofmoment">Topics of the Moment</string>
