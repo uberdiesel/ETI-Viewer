@@ -13,7 +13,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
@@ -37,11 +36,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import greendroid.app.GDActivity;
-import greendroid.graphics.drawable.ActionBarDrawable;
 import greendroid.image.ImageProcessor;
 import greendroid.widget.ActionBarItem;
 import greendroid.widget.AsyncImageView;
-import greendroid.widget.NormalActionBarItem;
 import greendroid.widget.QuickAction;
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
@@ -84,7 +81,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
         try {
 			Display();	
 		} catch (Exception e) {	e.printStackTrace();}
-        prepareQuickActionGrid();
+        
         setActionBarContentView(scrollview);
         
 		addActionBarItem(Type.Edit);
@@ -125,44 +122,51 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
     	public void onQuickActionClicked(QuickActionWidget widget, int position) {
-    		switch (position) {
-    			case 0:
-    				//TODO: Post Message
-    				break;
-    			case 1:
-    				if(page == 1) {
-    					//Refresh page
-    					GotoPage(page);
-    					break;
-    				}
-    				//Previous page
-    				GotoPage(page-1);
-             		break;
-    			case 2:
-    				if(page != pagecount) {
-    					//Next Page
-    					GotoPage(page+1);
-    					break;
-    				}
-    				if(page == pagecount && page != 1) {
-    					//Previous Page
-    					GotoPage(page-1);
-    					break;
-    				}
-    				//Goto Page
-    				GetPage();
-    				break;
-    			case 3:
-    				//Goto Page
-    				GetPage();
-    				break;
-            }
+    		try {
+	    		switch (position) {
+	    			case 0:
+	    				//TODO: Post Message
+	    				break;
+	    			case 1:
+	    				if(page == 1) {
+	    					//Refresh page
+	    					Display();
+	    					break;
+	    				}
+	    				//Previous page
+	    				page--;
+	    				Display();
+	             		break;
+	    			case 2:
+	    				if(page != pagecount) {
+	    					//Next Page
+	    					page++;
+	    					Display();
+	    					break;
+	    				}
+	    				if(page == pagecount && page != 1) {
+	    					//Previous Page
+	    					page--;
+	    					Display();
+	    					break;
+	    				}
+	    				//Goto Page
+	    				GetPage();
+	    				break;
+	    			case 3:
+	    				//Goto Page
+	    				GetPage();
+	    				break;
+	            }
+    		}
+    		catch (Exception e) {
+    			
+    		}
         }
     };
     
     private void GetPage() {
         final EditText input = new EditText(DisplayTopic.this);
-        final Holder PageHolder = new Holder();
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         new AlertDialog.Builder(DisplayTopic.this)
         	.setTitle("Go to Page")
@@ -175,10 +179,13 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
         				Toast.makeText(getApplicationContext(), "Invalid Page Number", Toast.LENGTH_SHORT).show();
         			}
         			else {
-        				PageHolder.SetPage(np);
-        				GotoPage(PageHolder.GetPage());
+        				page = np;
+        				try {
+							Display();
+						} catch (InterruptedException e) { e.printStackTrace();
+						} catch (ExecutionException e) { e.printStackTrace();
+						}
         			}
-        				
         		}
         	})
         	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -187,24 +194,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
         		}
         	}).show();	
 	}
-    
-    private void GotoPage(int p) {
-        //Declare Variables
-        Intent myIntent = new Intent(DisplayTopic.this, DisplayTopic.class);;
-        Bundle b = new Bundle();
-        
-        b.putString("URL", address);
-        b.putInt("page", p);
-        b.putString("title", title);
-        myIntent.putExtras(b);
-        startActivity(myIntent);
-    }
-    
-    private class Holder {
-    	private int pg;
-    	public void SetPage(int p) { this.pg = p; }
-    	public int GetPage() { return this.pg; }
-    }
     
     private static class MyQuickAction extends QuickAction {
         private static final ColorFilter BLACK_CF = new LightingColorFilter(Color.BLACK, Color.BLACK);
@@ -225,8 +214,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 			Log.v(LOG, "Displaying: " +  address + "&page=" + Integer.toString(page));
 			new LoadMessageList().execute(address + "&page=" + Integer.toString(page));
 		} catch (Exception e) {	e.printStackTrace(); }
-		//final ListView messagelist = (ListView) findViewById(R.id.Topicview);
-		//messagelist.setAdapter(new MessageCustomBaseAdapter(DisplayTopic.this, MessageList));
+		prepareQuickActionGrid();
 	}
 	
 	public void onScroll(AbsListView arg0, int arg1, int arg2, int arg3) {
@@ -259,6 +247,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  		protected void onPreExecute(){
  			//UI Thread, run before executing
  			pd = ProgressDialog.show(DisplayTopic.this, "Loading", "Fetching  Messages");	//opens progress dialog
+ 			layout.removeAllViews();
  			MessageList.clear();		
  		}
  		

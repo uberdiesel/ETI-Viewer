@@ -74,7 +74,7 @@ public class TopicList extends GDActivity{
 		try {
 			Display();
 		} catch (InterruptedException e) { e.printStackTrace();	} catch (ExecutionException e) { e.printStackTrace();}
-		prepareQuickActionGrid();
+		
 		
         topicslist.setOnItemClickListener(new OnItemClickListener() {
         	public void onItemClick(AdapterView<?> a, View v, int position, long id) {
@@ -110,6 +110,7 @@ public class TopicList extends GDActivity{
     }
     
 	private void Display() throws InterruptedException, ExecutionException {
+		prepareQuickActionGrid();
 	try {
 		if(!ToM) {
 			if(canPost)
@@ -120,7 +121,6 @@ public class TopicList extends GDActivity{
 		if(ToM)
 			new LoadTopicList().execute(address);
 	} catch (Exception e) { e.printStackTrace(); }
-
 	
 	}
 
@@ -154,61 +154,69 @@ public class TopicList extends GDActivity{
     //ActionGrid item listener
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
     	public void onQuickActionClicked(QuickActionWidget widget, int position) {
-    		if(!canPost)
-    			position = position + 3; // Set the non-posting topic positions to match canPost
-    		switch (position) {
-    			case 0:
-    				if(ToM) {
-    					//Refresh page
-    					GotoPage(page);
-    					break;
-    				}
-    				//TODO: Post Topic
-    				break;
-    			case 1:
-    				//Board List
-    		        startActivity(new Intent(TopicList.this, BoardList.class));
-    				break;
-    			case 2:
-    				//TODO: Add Search
-    				break;
-    			case 3:
-    				if(page == 1) {
-    					//Refresh page
-    					GotoPage(page);
-    					break;
-    				}
-    				//Previous page
-    				GotoPage(page-1);
-             		break;
-    			case 4:
-    				if(page != pagecount) {
-    					//Next Page
-    					GotoPage(page+1);
-    					break;
-    				}
-    				if(page == pagecount && page != 1) {
-    					//Previous Page
-    					GotoPage(page-1);
-    					break;
-    				}
-    				//Goto Page
-    				GetPage();
-    				break;
-    			case 5:
-    				//Goto Page
-    				GetPage();
-    				break;
-            }
+    		try {
+	    		if(!canPost)
+	    			position = position + 3; // Set the non-posting topic positions to match canPost
+	    		switch (position) {
+	    			case 0:
+	    				if(ToM) {
+	    					//Refresh page
+							Display();
+	    					break;
+	    				}
+	    				//TODO: Post Topic
+	    				break;
+	    			case 1:
+	    				//Board List
+	    		        startActivity(new Intent(TopicList.this, BoardList.class));
+	    				break;
+	    			case 2:
+	    				//TODO: Add Search
+	    				break;
+	    			case 3:
+	    				if(page == 1) {
+	    					//Refresh page
+	    					Display();
+	    					break;
+	    				}
+	    				//Previous page
+	    				page--;
+	    				Display();
+	             		break;
+	    			case 4:
+	    				if(page != pagecount) {
+	    					//Next Page
+	    					page++;
+	    					Display();
+	    					break;
+	    				}
+	    				if(page == pagecount && page != 1) {
+	    					//Previous Page
+	    					page--;
+	    					Display();
+	    					break;
+	    				}
+	    				//Goto Page
+	    				GetPage();
+	    				break;
+	    			case 5:
+	    				//Goto Page
+	    				GetPage();
+	    				break;
+	            }
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
         }
     };
     private void GetPage() {
         final EditText input = new EditText(TopicList.this);
-        final Holder PageHolder = new Holder();
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         new AlertDialog.Builder(TopicList.this)
         	.setTitle("Go to Page")
-        	.setMessage("Enter page number")
+        	.setMessage("Enter page (1-" + pagecount + ")")
         	.setView(input)
         	.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
@@ -217,8 +225,11 @@ public class TopicList extends GDActivity{
         				Toast.makeText(getApplicationContext(), "Invalid Page Number", Toast.LENGTH_SHORT).show();
         			}
         			else {
-        				PageHolder.SetPage(np);
-        				GotoPage(PageHolder.GetPage());
+        				page = np;
+        				try {
+							Display();
+						} catch (InterruptedException e) {e.printStackTrace();} 
+        				catch (ExecutionException e) {e.printStackTrace();	}
         			}
         				
         		}
@@ -229,17 +240,6 @@ public class TopicList extends GDActivity{
         		}
         	}).show();	
 	}
-    private void GotoPage(int p) {
-        //Declare Variables
-        Intent myIntent = new Intent(TopicList.this, TopicList.class);;
-        Bundle b = new Bundle();
-        
-        b.putString("URL", address);
-        b.putBoolean("postable", canPost);
-        b.putInt("page", p);
-        myIntent.putExtras(b);
-        startActivity(myIntent);
-    }
 
     private static class MyQuickAction extends QuickAction {
         private static final ColorFilter BLACK_CF = new LightingColorFilter(Color.BLACK, Color.BLACK);
@@ -254,11 +254,6 @@ public class TopicList extends GDActivity{
         
     }
 
-    private class Holder {
-    	private int pg;
-    	public void SetPage(int p) { this.pg = p; }
-    	public int GetPage() { return this.pg; }
-    }
     //AsyncTask <input, progress, results>		LOAD TOPIC LIST
  	private class LoadTopicList extends AsyncTask <String, Integer, Document > {
  		@Override
@@ -266,7 +261,7 @@ public class TopicList extends GDActivity{
  			//UI Thread, run before executing
  			pd = ProgressDialog.show(TopicList.this, "Loading", "Topic List");	//opens progress dialog
  			TopicList.clear();		
- 			//sd.notifyDataSetChanged();
+ 			ba.notifyDataSetChanged();
  		}
  		
  		@Override
