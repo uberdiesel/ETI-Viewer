@@ -2,9 +2,11 @@ package com.android.luelinksviewer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import javax.net.ssl.SSLException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -27,6 +30,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 public class Helper {
@@ -81,109 +86,100 @@ public class Helper {
 		}
 	}
 	
-	private static String GetPage (String Address) throws URISyntaxException {
-		BufferedReader in = null;
-		String HTMLSource = null;
+	private static Document getResponseDocument(HttpResponse response) {
+		InputStream in = null;
 		try {
-			HttpGet request = new HttpGet();
-			request.setURI(new URI(Address));
-			
-            HttpResponse response = client.execute(request);
-            in = new BufferedReader
-            (new InputStreamReader(response.getEntity().getContent()));
-            StringBuffer sb = new StringBuffer("");
-            String line = "";
-            String NL = System.getProperty("line.separator");
-            while ((line = in.readLine()) != null) {
-                sb.	append(line + NL);
-            }
-            in.close();
-            HTMLSource = sb.toString();
-            
-            }
-		catch (IOException e) {
+			in = response.getEntity().getContent();
+		} catch (IllegalStateException e) {
 			e.printStackTrace();
-			client = getTolerantClient();
-			GetPage(Address);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		finally {
-            if (in != null) {
-            	try {
-            		in.close();
-                } catch (IOException e) {
-                	e.printStackTrace();
-                }
-            }
-        }
-		return HTMLSource;
-	}
-	
-	public int GetPageCount (String Address) throws URISyntaxException {
-		//Declare Variables
-		Document doc;
-		String html;
+        
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		StringBuffer result = new StringBuffer();
 		
-		//Initiate Variables
-		html = GetPage(Address);
-		doc = Jsoup.parse(html);
-		Element pagecount = doc.select("div.infobar").first().select("span").first();
-		Log.v(LOG, "Pagecount: " + pagecount.text());
-		return Integer.parseInt(pagecount.text());
+		String line;
+		try {
+			while ((line = br.readLine()) != null){
+				result.append(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Document d = Jsoup.parse(result.toString());
+        return d;
 	}
 	
-	public ArrayList<Topic> ParseTopics(String Address) throws URISyntaxException {
-		ArrayList<Topic> TopicList = new ArrayList<Topic>();
+	public static Document GetPage (String Address) throws URISyntaxException, ClientProtocolException, IOException {
+		HttpGet get = new HttpGet(Address);
+        
+        // Execute HTTP Post Request
+		HttpResponse response = client.execute(get);
+		HttpEntity entity = response.getEntity();
+		
+		Document d = getResponseDocument(response);
+		entity.consumeContent();
+		
+		return d;
+	}	
+	
+	public ArrayList<Message> ParseMessages(String Address) throws URISyntaxException, ClientProtocolException, IOException {
+		ArrayList<Message> MessageList = new ArrayList<Message>();
 		//Declare Variables
 		String html, extraURL;
 		Document doc;
-		
+				
 		//Initiate Variables
 		extraURL = "//boards.endoftheinter.net";
-		html = GetPage(Address);
-		doc = Jsoup.parse(html);
+		doc = GetPage(Address);
+
 		
-		Elements topicList = doc.select("table").select("tr");
-		topicList.remove(0);
-		for (Element td : topicList){
-			Topic topicdata = new Topic();
+		Elements postList = doc.select("#u0_1").select(".message-container");
+        
+		String extraUserUrl = "//endoftheinter.net/";
+		
+		for (Element msg : postList){
+			//Parse every post 
+			MessageList.add(parsePost(msg));
 			
-			topicdata.setAddress(td.select("a").eq(0).attr("href").replace(extraURL, ""));
-			topicdata.setTitle(td.select("a").eq(0).text());
-			if(td.select("b").eq(0).hasText()) {
-				topicdata.setisSticky(true);
-			}
-				
-			//topic.put("author_link", td.select("a").eq(1).attr("href").replace(extraURL, ""));
-			topicdata.setPoster(td.select("a").eq(1).text());
-			
-			topicdata.setPostcount(td.select("td").eq(2).text());
-			
-			
-			String split = "[ ]+";
-	    	String[] splitpostcount = td.select("td").eq(2).text().split(split);
-	    	topicdata.setPostcount(splitpostcount[0]);
-	    	
-	    	
-	    	//Add bookmarking
-	    	if (splitpostcount.length > 1) {
-	    		int startsplit = splitpostcount[1].lastIndexOf("+") + 1;
-	    		int endsplit = splitpostcount[1].lastIndexOf(")");
-	    		String bookmarkcount = splitpostcount[1].substring(startsplit, endsplit);
-	    		topicdata.setPostBookmark(bookmarkcount); // Add number of "new" messages
-	    		topicdata.setisBookmark(true);
-	    		
-	    		//Set new address for topic
-	    		int posts = Integer.parseInt(splitpostcount[0]);
-	    		int newposts = Integer.parseInt(bookmarkcount);
-	    		if((posts-newposts) > 50) {
-	    			int page = (((posts-newposts) + 49) / 50 );
-	    			topicdata.setPage(page);
-	    		}
-	    	}
-		TopicList.add(topicdata);
 		}
-		return TopicList;
+		return MessageList;
 	}
+	private Message parsePost(Element msg) {
+		Message post = new Message();
+		//Makes the user bar textview----------------USERBAR----------------
+		String userbar = msg.select(".message-top").first().text();		//Everything in the user bar.
+			//Remove unnecessary  | Filter | Message Detail | Quote  from userbar
+		
+		Elements remove = msg.select(".message-top").first().select("a");
+		remove.remove(0);
+		
+		for (Element e : remove){
+			userbar = userbar.replace(e.text(), "");
+		}
+		
+		userbar = userbar.replace(" |  |  | ", "");	
+		
+		Log.v(LOG, userbar);
+		
+		
+		return post;
+		
+	}
+	public Bitmap drawable_from_url(String Address) throws java.net.MalformedURLException, java.io.IOException {
+	    Bitmap x;
+
+	    HttpURLConnection connection = (HttpURLConnection)new URL(Address) .openConnection();
+
+	    connection.connect();
+	    InputStream input = connection.getInputStream();
+
+	    x = BitmapFactory.decodeStream(input);
+	    return x;
+	}
+	
 	public static DefaultHttpClient getTolerantClient() {
 	    DefaultHttpClient client = new DefaultHttpClient();
 	    SSLSocketFactory sslSocketFactory = (SSLSocketFactory) client
@@ -196,6 +192,7 @@ public class Helper {
 	    return client;
 	}
 }
+
 class MyVerifier extends AbstractVerifier {
 
     private final X509HostnameVerifier delegate;

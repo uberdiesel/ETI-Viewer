@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:greendroid="http://schemas.android.com/apk/res/com.android.luelinksviewer"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+		<greendroid.widget.AsyncImageView
+			android:id="@+id/messageavatar"
+			greendroid:defaultSrc="@drawable/ic_tab_loading_avatar"
+			android:layout_width="@dimen/avatar_size"
+    		android:layout_height="@dimen/avatar_size">
+   		</greendroid.widget.AsyncImageView>
+</LinearLayout>

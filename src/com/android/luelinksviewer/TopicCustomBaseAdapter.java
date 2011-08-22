@@ -11,12 +11,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-public class CustomBaseAdapter extends BaseAdapter {
+public class TopicCustomBaseAdapter extends BaseAdapter {
 	 private static ArrayList<Topic> topicList;
 	 
 	 private LayoutInflater mInflater;
 
-	 public CustomBaseAdapter(Context context, ArrayList<Topic> results) {
+	 public TopicCustomBaseAdapter(Context context, ArrayList<Topic> results) {
 		 topicList = results;
 		 mInflater = LayoutInflater.from(context);
 	 }
@@ -63,9 +63,9 @@ public class CustomBaseAdapter extends BaseAdapter {
 		if(topicList.get(position).getisBookmark()) {
 			String postcount;
 			postcount = topicList.get(position).getPostcount();
-			postcount = postcount + "(+" + topicList.get(position).getPostBookmark() + ")";
+			postcount = postcount + " / +" + topicList.get(position).getPostBookmark();
 			holder.txtPostcount.setText(postcount);
-
+			//TODO: Make the postcount/bookmark count look a lot sexier
 		}
 		else {
 			holder.txtPostcount.setText(topicList.get(position).getPostcount());

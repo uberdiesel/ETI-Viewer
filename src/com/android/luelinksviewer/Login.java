@@ -8,7 +8,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -60,7 +62,21 @@ public class Login extends Activity{
         /*if (!username.getText().toString().contains("")){
         	cbSave.setChecked(false);
         }*/
+        
+        final Button loginbtn = (Button) findViewById(R.id.login_btn);
+        loginbtn.setOnClickListener(new OnClickListener() {
+    		public void onClick(View v) {
+    			try {
+    				login(findViewById(R.id.login_btn));
+    			} catch (Exception e) {
+    				e.printStackTrace();
+    			}
+    		}
+        });
+        
+        
     }
+    
     
     
     public void login(View v) {

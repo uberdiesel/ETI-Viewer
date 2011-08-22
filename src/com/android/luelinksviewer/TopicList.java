@@ -3,7 +3,12 @@ package com.android.luelinksviewer;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,11 +16,16 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 import greendroid.app.GDActivity;
 import greendroid.graphics.drawable.ActionBarDrawable;
 import greendroid.widget.ActionBarItem;
@@ -27,39 +37,58 @@ import greendroid.widget.ActionBarItem.Type;
 import greendroid.widget.QuickActionWidget.OnQuickActionClickListener;
 
 public class TopicList extends GDActivity{
-	private ArrayList<Topic> topicdata = new ArrayList<Topic>();
+	LuelinksViewer LueApp;
+	ProgressDialog pd;
+	ListView lv;
+	ArrayList<Topic> TopicList = new ArrayList<Topic>();
+	TopicCustomBaseAdapter ba;
+	ListView topicslist;
 	private String address;
 	private String LOG = "TopicList";
 	private QuickActionWidget mGrid;
-	private int page, pagecount;
+	int page, pagecount;
 	private boolean canPost, ToM;
 	
-    public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//Define Variables
 		Bundle b;
-
+		
 		//Initiate Variables
 		b = getIntent().getExtras();
 		address = b.getString("URL");
 		canPost = b.getBoolean("postable");
 		page = b.getInt("page");
 		ToM = b.getBoolean("ToM");
-		Log.v(LOG, "ToM: " + new Boolean(ToM).toString());
-		
-		//TODO: Make a proper title
-		setTitle("BOARD - " + Integer.toString(page));
+
 		addActionBarItem(getActionBar()
-			.newActionBarItem(NormalActionBarItem.class)
-            .setDrawable(new ActionBarDrawable(this, R.drawable.gd_action_bar_compose)), R.string.gd_compose);
+		.newActionBarItem(NormalActionBarItem.class)
+		            .setDrawable(new ActionBarDrawable(this, R.drawable.gd_action_bar_compose)), R.string.gd_compose);
 		
 		//Prepare view
 		setContentView(R.layout.topiclist);
 		addActionBarItem(Type.Edit);
+		topicslist = (ListView) findViewById(R.id.Topicview);
+		ba = new TopicCustomBaseAdapter(TopicList.this, TopicList);
+		topicslist.setAdapter(ba);
 		try {
-			Display();	
-			prepareQuickActionGrid();
-		} catch (Exception e) {	e.printStackTrace();}
+			Display();
+		} catch (InterruptedException e) { e.printStackTrace();	} catch (ExecutionException e) { e.printStackTrace();}
+		prepareQuickActionGrid();
+		
+        topicslist.setOnItemClickListener(new OnItemClickListener() {
+        	public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+        		Intent myIntent = new Intent(TopicList.this, DisplayTopic.class);;
+    	        Bundle b = new Bundle(); 
+    	        b.putString("URL", TopicList.get(position).getAddress());
+    	        b.putInt("page", TopicList.get(position).getPage());
+    	        b.putString("title", TopicList.get(position).getTitle());
+    	        myIntent.putExtras(b);
+    	        Log.v(LOG, TopicList.get(position).getAddress());
+    	        startActivity(myIntent);
+        	}
+        });
+		
 	}
     
     public void onShowGrid(View v) {
@@ -81,149 +110,137 @@ public class TopicList extends GDActivity{
     }
     
 	private void Display() throws InterruptedException, ExecutionException {
-		try {
-			Helper topicRetrival = new Helper();
-			if(!ToM) {
-				pagecount = topicRetrival.GetPageCount(address);
-				if(canPost)
-					topicdata = topicRetrival.ParseTopics(address + "&page=" + Integer.toString(page));
-				else
-					topicdata = topicRetrival.ParseTopics(address + "?page=" + Integer.toString(page));
-			}
-			topicdata = topicRetrival.ParseTopics(address);
-		} catch (Exception e) {	e.printStackTrace(); }
-		final ListView topicslist = (ListView) findViewById(R.id.Boardview);
-		topicslist.setAdapter(new CustomBaseAdapter(TopicList.this, topicdata));
-	}
+	try {
+		if(!ToM) {
+			if(canPost)
+				new LoadTopicList().execute(address + "&page=" + Integer.toString(page));
+			else
+				new LoadTopicList().execute(address + "?page=" + Integer.toString(page));
+		}
+		if(ToM)
+			new LoadTopicList().execute(address);
+	} catch (Exception e) { e.printStackTrace(); }
+
 	
-	//Prepare actiongrid
+	}
+
+//Prepare actiongrid
     private void prepareQuickActionGrid() {
         mGrid = new QuickActionGrid(this);
         //Check to ToM. If true, set Refresh and return
         if(ToM) {
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_refresh, R.string.refresh));
-        	return;
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_refresh, R.string.refresh));
+         return;
         }
         //Check for not-posting board, if true: add proper buttons
         if(canPost) {
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_compose, R.string.post_topic));
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_list, R.string.board_list));
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_search, R.string.search));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_compose, R.string.post_topic));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_list, R.string.board_list));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_search, R.string.search));
 
         }
         if(page == 1) //Page = 1, display refresh
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_refresh, R.string.refresh));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_refresh, R.string.refresh));
         else
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_backarrow, R.string.previous_page));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_backarrow, R.string.previous_page));
         if(page != pagecount)
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_nextarrow, R.string.next_page));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_nextarrow, R.string.next_page));
         if(page == pagecount && page != 1)
-        	mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_backarrow, R.string.previous_page));
+         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.ic_action_backarrow, R.string.previous_page));
         mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_export, R.string.goto_page));
         mGrid.setOnQuickActionClickListener(mActionListener);
     }
     
     //ActionGrid item listener
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
-        public void onQuickActionClicked(QuickActionWidget widget, int position) {
-        	//Declare Variables
-        	Intent myIntent;
-        	Bundle b;
-        	
-        	//Set Values
-        	b = new Bundle();
-        	myIntent = new Intent(TopicList.this, TopicList.class);
-        	
-        	if(!canPost)
-        		position = position + 3; // Set the non-posting topic positions to match canPost
-            switch (position) {
-            case 0:
-            	if(ToM) {
-            		//Refresh page
-            		b.putString("URL", address);
-            		b.putBoolean("postable", canPost);
-            		b.putInt("page", page);
-            		myIntent.putExtras(b);
-            		startActivity(myIntent);
-            		break;
-            	}
-            	break;
-            case 1:
-            	//TODO: Add Board List
-            	break;
-            case 2:
-            	//TODO: Add Search
-            	break;
-            case 3:
-            	if(page == 1) {
-            		//Refresh page
-            		b.putString("URL", address);
-            		b.putBoolean("postable", canPost);
-            		b.putInt("page", page);
-            		myIntent.putExtras(b);
-            		startActivity(myIntent);
-            		break;
-            	}
-            	//Previous page
-        		b.putString("URL", address);
-        		b.putBoolean("postable", canPost);
-        		b.putInt("page", page-1);
-        		myIntent.putExtras(b);
-        		startActivity(myIntent);
-            	break;
-            case 4:
-        		if(page != pagecount) {
-        			//Next Page
-            		b.putString("URL", address);
-            		b.putBoolean("postable", canPost);
-            		b.putInt("page", page+1);
-            		myIntent.putExtras(b);
-            		startActivity(myIntent);
-        			break;
-        		}
-        		if(page == pagecount && page != 1) {
-        			//Previous Page
-            		b.putString("URL", address);
-            		b.putBoolean("postable", canPost);
-            		b.putInt("page", page-1);
-            		myIntent.putExtras(b);
-            		startActivity(myIntent);
-        			break;
-        		}
-        		//TODO: Add Goto Page
-        		final EditText input = new EditText(TopicList.this);
-        		final String pageget;
-
-        		new AlertDialog.Builder(TopicList.this)
-        		    .setTitle("Go to Page")
-        		    .setMessage("Enter page number")
-        		    .setView(input)
-        		    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-        		         public void onClick(DialogInterface dialog, int whichButton) {
-        		             pageget = input.getText(); 
-        		             // deal with the editable
-        		         }
-        		    })
-        		    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		         public void onClick(DialogInterface dialog, int whichButton) {
-        		                // Do nothing.
-        		         }
-        		    }).show();
-
-
-            	break;
-            case 5:
-            	//TODO: Add Goto Page
-            	break;
+    	public void onQuickActionClicked(QuickActionWidget widget, int position) {
+    		if(!canPost)
+    			position = position + 3; // Set the non-posting topic positions to match canPost
+    		switch (position) {
+    			case 0:
+    				if(ToM) {
+    					//Refresh page
+    					GotoPage(page);
+    					break;
+    				}
+    				//TODO: Post Topic
+    				break;
+    			case 1:
+    				//Board List
+    		        startActivity(new Intent(TopicList.this, BoardList.class));
+    				break;
+    			case 2:
+    				//TODO: Add Search
+    				break;
+    			case 3:
+    				if(page == 1) {
+    					//Refresh page
+    					GotoPage(page);
+    					break;
+    				}
+    				//Previous page
+    				GotoPage(page-1);
+             		break;
+    			case 4:
+    				if(page != pagecount) {
+    					//Next Page
+    					GotoPage(page+1);
+    					break;
+    				}
+    				if(page == pagecount && page != 1) {
+    					//Previous Page
+    					GotoPage(page-1);
+    					break;
+    				}
+    				//Goto Page
+    				GetPage();
+    				break;
+    			case 5:
+    				//Goto Page
+    				GetPage();
+    				break;
             }
         }
     };
-	
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		//TODO: Open a topic up.
-		Log.v(LOG, "Topic Clicked");
-	 }
-	
+    private void GetPage() {
+        final EditText input = new EditText(TopicList.this);
+        final Holder PageHolder = new Holder();
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        new AlertDialog.Builder(TopicList.this)
+        	.setTitle("Go to Page")
+        	.setMessage("Enter page number")
+        	.setView(input)
+        	.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			int np = Integer.parseInt(input.getText().toString());
+        			if(np > pagecount && np < 1) {
+        				Toast.makeText(getApplicationContext(), "Invalid Page Number", Toast.LENGTH_SHORT).show();
+        			}
+        			else {
+        				PageHolder.SetPage(np);
+        				GotoPage(PageHolder.GetPage());
+        			}
+        				
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// Do nothing.
+        		}
+        	}).show();	
+	}
+    private void GotoPage(int p) {
+        //Declare Variables
+        Intent myIntent = new Intent(TopicList.this, TopicList.class);;
+        Bundle b = new Bundle();
+        
+        b.putString("URL", address);
+        b.putBoolean("postable", canPost);
+        b.putInt("page", p);
+        myIntent.putExtras(b);
+        startActivity(myIntent);
+    }
+
     private static class MyQuickAction extends QuickAction {
         private static final ColorFilter BLACK_CF = new LightingColorFilter(Color.BLACK, Color.BLACK);
         public MyQuickAction(Context ctx, int drawableId, int titleId) {
@@ -236,6 +253,104 @@ public class TopicList extends GDActivity{
         }
         
     }
-	
-}
 
+    private class Holder {
+    	private int pg;
+    	public void SetPage(int p) { this.pg = p; }
+    	public int GetPage() { return this.pg; }
+    }
+    //AsyncTask <input, progress, results>		LOAD TOPIC LIST
+ 	private class LoadTopicList extends AsyncTask <String, Integer, Document > {
+ 		@Override
+ 		protected void onPreExecute(){
+ 			//UI Thread, run before executing
+ 			pd = ProgressDialog.show(TopicList.this, "Loading", "Topic List");	//opens progress dialog
+ 			TopicList.clear();		
+ 			//sd.notifyDataSetChanged();
+ 		}
+ 		
+ 		@Override
+ 		protected Document doInBackground(String... addr) {
+ 			Document doc = null;
+ 			try {
+ 				doc = Helper.GetPage(addr[0]);
+ 			} catch (Exception e) {
+ 				e.printStackTrace();
+ 			
+ 			}
+ 			pd.dismiss();
+ 			return doc;
+ 		}
+ 		
+ 		protected void onPostExecute(Document doc){
+ 			//UI Thread, what to do after
+ 			String extraUrl = "//boards.endoftheinter.net";
+ 			
+ 			try {
+ 				if(ToM)
+ 					setTitle("Topics of the Moment");
+ 				else
+ 					setTitle(Integer.toString(page) + ": " + doc.select("h1").text());
+ 				if(!ToM) {
+ 	 				Element pc = doc.select("div.infobar").first().select("span").first();
+ 	 	 			Log.v(LOG, "Pagecount: " + pc.text());
+ 	 	 			pagecount = Integer.parseInt(pc.text());
+ 	 			}
+ 				
+ 				Elements topics = doc.select("table").select("tr");
+ 				topics.remove(0);
+ 				if(ToM)
+ 					topics.remove(0); //Remove the ToM header from being added as well.
+ 				for (Element td : topics){
+ 					Topic topicinfo = new Topic();
+ 					
+ 					topicinfo.setAddress("http://boards.endoftheinter.net" + td.select("a").eq(0).attr("href").replace(extraUrl, ""));
+ 					topicinfo.setTitle(td.select("a").eq(0).text());
+ 					if(td.select("b").eq(0).hasText()) {
+ 						topicinfo.setisSticky(true);
+ 					}
+ 						
+ 					//topic.put("author_link", td.select("a").eq(1).attr("href").replace(extraURL, ""));
+ 					topicinfo.setPoster(td.select("a").eq(1).text());
+ 					
+ 					topicinfo.setPostcount(td.select("td").eq(2).text());
+ 					
+ 					
+ 					String split = "[ ]+";
+ 			    	String[] splitpostcount = td.select("td").eq(2).text().split(split);
+ 			    	topicinfo.setPostcount(splitpostcount[0]);
+ 			    	
+ 			    	
+ 			    	//Add bookmarking
+ 			    	if (splitpostcount.length > 1) {
+ 			    		int startsplit = splitpostcount[1].lastIndexOf("+") + 1;
+ 			    		int endsplit = splitpostcount[1].lastIndexOf(")");
+ 			    		String bookmarkcount = splitpostcount[1].substring(startsplit, endsplit);
+ 			    		topicinfo.setPostBookmark(bookmarkcount); // Add number of "new" messages
+ 			    		topicinfo.setisBookmark(true);
+ 			    		
+ 			    		//Set new address for topic
+ 			    		int posts = Integer.parseInt(splitpostcount[0]);
+ 			    		int newposts = Integer.parseInt(bookmarkcount);
+ 			    		if((posts-newposts) > 50) {
+ 			    			int page = (((posts-newposts) + 49) / 50 );
+ 			    			topicinfo.setPage(page);
+ 			    		}
+ 			    	}
+ 				TopicList.add(topicinfo);
+ 				ba.notifyDataSetChanged();
+ 				}
+ 				
+ 			}catch (NullPointerException e){
+ 				Log.v(LOG, "Must Relog");
+ 				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
+ 				
+     			Intent intent = new Intent(TopicList.this, Login.class);
+     			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+     			startActivity(intent);
+ 			}
+
+ 		}
+ 		
+ 	}
+}

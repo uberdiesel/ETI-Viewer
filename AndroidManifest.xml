@@ -20,6 +20,8 @@
 		<activity android:name=".LuelinksViewer" android:label="@string/app_name"></activity>
 		<activity android:name=".TopicList" android:label="@string/app_name"></activity>
 		<activity android:name=".BoardList" android:label="@string/app_name"></activity>
+		<activity android:name=".TopicViewer" android:label="@string/app_name"></activity>
+		<activity android:name=".DisplayTopic" android:label="@string/app_name"></activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
