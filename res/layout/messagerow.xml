@@ -6,7 +6,6 @@
     android:layout_height="wrap_content">
 		<greendroid.widget.AsyncImageView
 			android:id="@+id/messageavatar"
-			greendroid:defaultSrc="@drawable/ic_tab_loading_avatar"
 			android:layout_width="@dimen/avatar_size"
     		android:layout_height="@dimen/avatar_size">
    		</greendroid.widget.AsyncImageView>

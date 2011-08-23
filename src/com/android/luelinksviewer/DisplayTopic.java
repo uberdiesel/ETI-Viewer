@@ -172,7 +172,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         new AlertDialog.Builder(DisplayTopic.this)
         	.setTitle("Go to Page")
-        	.setMessage("Enter page number")
+        	.setMessage("Enter page (1-" + pagecount + ")")
         	.setView(input)
         	.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
@@ -283,23 +283,28 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 		}
  		private void parseMessage(Element msg) {
  			//Declare Variables
- 			String header, avatarurl;
+ 			String author, date, avatarurl;
  			Elements body;
+ 			Element header;
+ 			Message messageData;
  			
  			//Initiate Variables
- 			header = null;
+ 			author = null;
+ 			date = null;
  			avatarurl = null;
+ 			messageData = new Message();
  			
- 			Message messageData = new Message();
-			String userbar = msg.select(".message-top").first().text();		//Nab Userbar Text
-			Elements remove = msg.select(".message-top").first().select("a"); //Remove links
-			remove.remove(0); //Remove "From:"
-			for (Element e : remove){
-				userbar = userbar.replace(e.text(), "");
-			}
-			header = userbar.replace(" |  |  | ", "");		//Removes leftovers
-			//TODO: Setup the Userbar correctly
-			messageData.setAuthor(header);
+ 			header = msg.select("div.message-top").first();
+	    	// Parse Out Header Data
+	    	String split = "[|]";
+	    	String[] splithead = header.text().split(split);
+	    	String posthead = splithead[0].trim();
+	    	String datehead = splithead[1].trim();
+	    	datehead = datehead.substring(8);
+	    	author = posthead.substring(6);
+	    	date = datehead.substring(0, datehead.length()-6);
+	    	//messageData.setAuthor(author);
+			//messageData.setDate(date);
 			
 			//Get body HTML
 			body = msg.select(".message");
@@ -315,16 +320,16 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 				avatarurl = "http:" + a.trim();
 				messageData.setAvatarUrl(avatarurl);
 			}
-			GetHeader(userbar, avatarurl);
+			GetHeader(author, date, avatarurl);
 			GetBody(body);
 			//MessageList.add(messageData);
  		}
- 		private void GetHeader(String userbar, String avatarurl) {
+ 		private void GetHeader(String a, String d, String avatarurl) {
  			//Declare Views
  			RelativeLayout header;
  			AsyncImageView avatar;
- 			TextView author;
- 			RelativeLayout.LayoutParams  avalayout, authlayout;
+ 			TextView author, date;
+ 			RelativeLayout.LayoutParams  avalayout, authlayout, datelayout;
  			
  			//Initiate Variables
  			header = new RelativeLayout(DisplayTopic.this);
@@ -332,30 +337,37 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			avatar.setImageProcessor(mImageProcessor);
 
  			author = new TextView(DisplayTopic.this);
+ 			date = new TextView(DisplayTopic.this);
  			avalayout = new RelativeLayout.LayoutParams(100, 100);
  			authlayout = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+ 			datelayout = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
  			
  			//Set IDs
  			header.setId(01);
  			avatar.setId(02);
  			author.setId(03);
+ 			date.setId(04);
  			
  			//Set Layout Rules
- 			//avalayout.addRule(RelativeLayout.LEFT_OF, 03);
  			authlayout.addRule(RelativeLayout.RIGHT_OF, 02);
+ 			datelayout.addRule(RelativeLayout.BELOW, 03);
+ 			datelayout.addRule(RelativeLayout.RIGHT_OF, 02);
  			
  			//Set Layouts
  			header.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
  			avatar.setLayoutParams(avalayout);
  			author.setLayoutParams(authlayout);
+ 			date.setLayoutParams(datelayout);
  			
  			//Make the Views
  			avatar.setUrl(avatarurl);
- 			author.setText(userbar);
+ 			author.setText(a);
+ 			date.setText(d);
  			
  			//Add Views
  			header.addView(avatar);
  			header.addView(author);
+ 			header.addView(date);
  			layout.addView(header);
  			
  		}

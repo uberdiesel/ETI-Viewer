@@ -16,6 +16,11 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.util.Log;
 
+import org.acra.*;
+import org.acra.annotation.*;
+
+@ReportsCrashes(formKey = "dEF6cXVwaUxJQkZxbEtRQUlPQy15S0E6MQ") 
+
 public class LuelinksViewer extends GDApplication {
 
 	String SAVED_COOKIES = "SAVED_COOKIES";
@@ -42,7 +47,8 @@ public class LuelinksViewer extends GDApplication {
 		cookie_editor = cookies.edit();
 		preferences = getSharedPreferences(SAVED_PREFERENCES, 0);
 		preference_editor = preferences.edit();
-		
+		ACRA.init(this);
+
 		if (restoreCookies()){	
 			//Restore cookies, TRUE if successful restore
 		}else {					
