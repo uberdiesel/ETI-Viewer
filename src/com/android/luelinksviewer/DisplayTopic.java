@@ -123,8 +123,10 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
     	public void onQuickActionClicked(QuickActionWidget widget, int position) {
     		try {
+    			Log.v(LOG, Integer.toString(position));
 	    		switch (position) {
 	    			case 0:
+	    				Log.v(LOG, Integer.toString(position));
 	    				//TODO: Post Message
 	    				break;
 	    			case 1:
@@ -151,7 +153,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 	    					break;
 	    				}
 	    				//Goto Page
-	    				GetPage();
+	    				Display();
 	    				break;
 	    			case 3:
 	    				//Goto Page
@@ -248,20 +250,17 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			//UI Thread, run before executing
  			pd = ProgressDialog.show(DisplayTopic.this, "Loading", "Fetching  Messages");	//opens progress dialog
  			layout.removeAllViews();
+ 			scrollview.removeAllViews();
  			MessageList.clear();		
  		}
  		
  		@Override
  		protected Document doInBackground(String... addr) {
  			//what to do in the background			
- 			Document doc = null;
- 			layout.removeAllViews();
+ 			Document doc = null; 			
  			try {
  				doc = Helper.GetPage(addr[0]);
- 			} catch (Exception e) {
- 				e.printStackTrace();
- 			}
- 			
+ 			} catch (Exception e) {	e.printStackTrace(); }
  			return doc;
  		}
  		
@@ -430,10 +429,8 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  							
  						}
  					}*/
- 				}else {
- 					Log.v("Helper", "ADDING POST");
+ 				}else
  					createPost(text);
- 				}
  			}
  		}
  		

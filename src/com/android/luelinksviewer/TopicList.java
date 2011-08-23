@@ -88,7 +88,6 @@ public class TopicList extends GDActivity{
     	        startActivity(myIntent);
         	}
         });
-		
 	}
     
     public void onShowGrid(View v) {
@@ -280,7 +279,6 @@ public class TopicList extends GDActivity{
  		protected void onPostExecute(Document doc){
  			//UI Thread, what to do after
  			String extraUrl = "//boards.endoftheinter.net";
- 			
  			try {
  				if(ToM)
  					setTitle("Topics of the Moment");
@@ -288,11 +286,18 @@ public class TopicList extends GDActivity{
  					setTitle(Integer.toString(page) + ": " + doc.select("h1").text());
  				if(!ToM) {
  	 				Element pc = doc.select("div.infobar").first().select("span").first();
- 	 	 			Log.v(LOG, "Pagecount: " + pc.text());
  	 	 			pagecount = Integer.parseInt(pc.text());
  	 			}
- 				
  				Elements topics = doc.select("table").select("tr");
+ 				if (!topics.hasText()) {
+ 					//Empty table, probably due to a login issue.
+ 	 				Log.v(LOG, "Must Relog");
+ 	 				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
+ 	 				
+ 	     			Intent intent = new Intent(TopicList.this, Login.class);
+ 	     			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+ 	     			startActivity(intent);
+ 				}
  				topics.remove(0);
  				if(ToM)
  					topics.remove(0); //Remove the ToM header from being added as well.
