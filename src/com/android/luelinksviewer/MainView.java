@@ -56,19 +56,26 @@ public class MainView extends GDListActivity {
 				b = new Bundle();
 				b.putString("URL",getString(R.string.moment_uri));
 				b.putBoolean("postable", false);
-				b.putBoolean("ToM", true);
-				Log.v(LOG, getString(R.string.moment_uri)); 
+				b.putInt("type", 0);
 				myIntent.putExtras(b);
 				startActivity(myIntent);
 	 			break;
 	 		case 2:
-	 			//TODO: Add an activity to open posted topics
+	 			myIntent = new Intent(this, TopicList.class);
+				b = new Bundle();
+				b.putString("URL",getString(R.string.posted_uri));
+				b.putBoolean("postable", false);
+				b.putInt("type", 2);
+				b.putInt("page", 1);
+				myIntent.putExtras(b);
+				startActivity(myIntent);
 	 			break;
 	 		case 3:
 	 			myIntent = new Intent(this, TopicList.class);
 				b = new Bundle();
 				b.putString("URL",getString(R.string.tagged_uri));
 				b.putBoolean("postable", false);
+				b.putInt("type", 1);
 				b.putInt("page", 1);
 				myIntent.putExtras(b);
 				startActivity(myIntent);
@@ -80,7 +87,8 @@ public class MainView extends GDListActivity {
 	 			//TODO: Add an activity to open the PM
 	 			break;
 	 		case 6:
-	 			//TODO: Add an activity to open the poll
+	 			myIntent = new Intent(this, SubmitPoll.class);
+				startActivity(myIntent);
 	 			break;
 	 		case 7:
 	 			//TODO: Add an activity to open the profle

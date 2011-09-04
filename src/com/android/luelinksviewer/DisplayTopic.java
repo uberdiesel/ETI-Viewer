@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -211,9 +212,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     }
     
 	private void Display() throws InterruptedException, ExecutionException {
-		Log.v(LOG, "Display Entered");
 		try {
-			Log.v(LOG, "Displaying: " +  address + "&page=" + Integer.toString(page));
 			new LoadMessageList().execute(address + "&page=" + Integer.toString(page));
 		} catch (Exception e) {	e.printStackTrace(); }
 		prepareQuickActionGrid();
@@ -267,7 +266,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  		protected void onPostExecute(Document doc){
  			setTitle(Integer.toString(page) + ": " + title);
 			Element pc = doc.select("div.infobar").first().select("span").first();
- 			Log.v(LOG, "Pagecount: " + pc.text());
  			pagecount = Integer.parseInt(pc.text());
  			
 			try {
@@ -338,7 +336,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 
  			author = new TextView(DisplayTopic.this);
  			date = new TextView(DisplayTopic.this);
- 			avalayout = new RelativeLayout.LayoutParams(100, 100);
+ 			avalayout = new RelativeLayout.LayoutParams(110, 100);
  			authlayout = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
  			datelayout = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
  			
@@ -352,9 +350,12 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			authlayout.addRule(RelativeLayout.RIGHT_OF, 02);
  			datelayout.addRule(RelativeLayout.BELOW, 03);
  			datelayout.addRule(RelativeLayout.RIGHT_OF, 02);
+ 			avalayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+ 			avatar.setPadding(0, 0, 10, 0);
  			
  			//Set Layouts
  			header.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+ 			header.setBackgroundColor(Color.rgb(104, 150, 213));
  			avatar.setLayoutParams(avalayout);
  			author.setLayoutParams(authlayout);
  			date.setLayoutParams(datelayout);
@@ -362,6 +363,10 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			//Make the Views
  			avatar.setUrl(avatarurl);
  			author.setText(a);
+ 			author.setTextColor(Color.rgb(0, 0, 0));
+ 			author.setTextSize(14);
+ 			author.setTypeface(null, Typeface.BOLD);
+ 			date.setTextColor(Color.rgb(0, 0, 0));
  			date.setText(d);
  			
  			//Add Views
@@ -403,13 +408,12 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  				//Get the images in order they were posted
  				images.add(i.attr("imgsrc"));
  				Log.v("Image url", i.attr("src"));
- 			}		
+ 			}
  			
  			String[] parts = clean.split("<br />");
  			
  			int y = 0;
  			for (String post : parts){
- 				
  				String text = post.replace("<br />", "").replace("<span>", "")
  						.replace("</span>", "").replace("&lt;", "<").replace("&gt;", ">")
  						.replace("<a>", "").replace("</a>", "").replace("&quot;", "''").trim();
@@ -426,6 +430,10 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  					Log.v("FOUND", "Spoiler Found");
  					
  					createPost(text);
+ 					
+ 					//TODO: Add a view to the spoiler. Make the button use a .addview(VIEW, INDEX) to show where to add
+ 					//the view
+ 					
  					
  					/*for (Element sp : spoilerDoc.select("body")){
  						Log.v("SpoilFor", sp.html());
@@ -445,7 +453,9 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  					createPost(text);
  			}
  		}
- 		
+ 		private void getMessage() {
+ 			
+ 		}
  		private void createPost(String string) {
  			//Creates a new textview for the post body text
  			//Adds it to the overall layout

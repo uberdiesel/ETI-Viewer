@@ -26,9 +26,9 @@ public final class R {
     public static final class array {
         /**  Board Names / IDs
          */
-        public static final int boardlist=0x7f0a0000;
-        public static final int boardsubtext=0x7f0a0001;
-        public static final int boardvalues=0x7f0a0002;
+        public static final int boardlist=0x7f0b0000;
+        public static final int boardsubtext=0x7f0b0001;
+        public static final int boardvalues=0x7f0b0002;
     }
     public static final class attr {
         /** <p>Must be an integer value, such as "<code>100</code>".
@@ -738,6 +738,14 @@ containing a value of this type.
         public static final int topictitle=0x7f050032;
         public static final int xhdpi=0x7f050006;
     }
+    public static final class integer {
+        /**  Topic List Board Types 
+         */
+        public static final int ToM=0x7f0a0000;
+        public static final int board=0x7f0a0003;
+        public static final int posted=0x7f0a0002;
+        public static final int tagged=0x7f0a0001;
+    }
     public static final class layout {
         public static final int board=0x7f030000;
         public static final int gd_action_bar_dashboard=0x7f030001;
@@ -824,7 +832,7 @@ containing a value of this type.
          */
         public static final int post_topic=0x7f08001d;
         public static final int posted_messages=0x7f080026;
-        public static final int postedt_uri=0x7f08002f;
+        public static final int posted_uri=0x7f08002f;
         public static final int previous_page=0x7f08001f;
         public static final int private_messages=0x7f080029;
         public static final int profile=0x7f08002b;

@@ -48,6 +48,7 @@ public class TopicList extends GDActivity{
 	private QuickActionWidget mGrid;
 	int page, pagecount;
 	private boolean canPost, ToM;
+	private int topictype;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,6 +61,8 @@ public class TopicList extends GDActivity{
 		canPost = b.getBoolean("postable");
 		page = b.getInt("page");
 		ToM = b.getBoolean("ToM");
+		topictype = b.getInt("type");
+		Log.v(LOG, Integer.toString(topictype));
 
 		addActionBarItem(getActionBar()
 		.newActionBarItem(NormalActionBarItem.class)
@@ -111,13 +114,13 @@ public class TopicList extends GDActivity{
 	private void Display() throws InterruptedException, ExecutionException {
 		prepareQuickActionGrid();
 	try {
-		if(!ToM) {
-			if(canPost)
+		if(topictype > 0) {
+			if(topictype > 2)
 				new LoadTopicList().execute(address + "&page=" + Integer.toString(page));
 			else
 				new LoadTopicList().execute(address + "?page=" + Integer.toString(page));
 		}
-		if(ToM)
+		else
 			new LoadTopicList().execute(address);
 	} catch (Exception e) { e.printStackTrace(); }
 	
@@ -127,12 +130,12 @@ public class TopicList extends GDActivity{
     private void prepareQuickActionGrid() {
         mGrid = new QuickActionGrid(this);
         //Check to ToM. If true, set Refresh and return
-        if(ToM) {
+        if(topictype == 0) {
          mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_refresh, R.string.refresh));
          return;
         }
         //Check for not-posting board, if true: add proper buttons
-        if(canPost) {
+        if(topictype > 2) {
          mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_compose, R.string.post_topic));
          mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_list, R.string.board_list));
          mGrid.addQuickAction(new MyQuickAction(this, R.drawable.gd_action_bar_search, R.string.search));
@@ -154,11 +157,11 @@ public class TopicList extends GDActivity{
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
     	public void onQuickActionClicked(QuickActionWidget widget, int position) {
     		try {
-	    		if(!canPost)
+	    		if(topictype < 3)
 	    			position = position + 3; // Set the non-posting topic positions to match canPost
 	    		switch (position) {
 	    			case 0:
-	    				if(ToM) {
+	    				if(topictype == 0) {
 	    					//Refresh page
 							Display();
 	    					break;
@@ -280,39 +283,37 @@ public class TopicList extends GDActivity{
  			//UI Thread, what to do after
  			String extraUrl = "//boards.endoftheinter.net";
  			try {
- 				if(ToM)
+ 				if(topictype == 0)
  					setTitle("Topics of the Moment");
  				else
  					setTitle(Integer.toString(page) + ": " + doc.select("h1").text());
- 				if(!ToM) {
+ 				if(topictype > 0) {
  	 				Element pc = doc.select("div.infobar").first().select("span").first();
  	 	 			pagecount = Integer.parseInt(pc.text());
  	 			}
  				Elements topics = doc.select("table").select("tr");
- 				if (!topics.hasText()) {
- 					//Empty table, probably due to a login issue.
- 	 				Log.v(LOG, "Must Relog");
- 	 				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
- 	 				
- 	     			Intent intent = new Intent(TopicList.this, Login.class);
- 	     			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
- 	     			startActivity(intent);
- 				}
  				topics.remove(0);
- 				if(ToM)
+ 				if(topictype == 0)
  					topics.remove(0); //Remove the ToM header from being added as well.
  				for (Element td : topics){
  					Topic topicinfo = new Topic();
  					
- 					topicinfo.setAddress("http://boards.endoftheinter.net" + td.select("a").eq(0).attr("href").replace(extraUrl, ""));
+ 					//Set Topic Address
+ 					//if (topictype == 2)
+ 						//td.select("a").eq(0).remove();
+ 					topicinfo.setAddress("http:" + td.select("a").eq(0).attr("href").toString());
  					topicinfo.setTitle(td.select("a").eq(0).text());
  					if(td.select("b").eq(0).hasText()) {
  						topicinfo.setisSticky(true);
  					}
  						
  					//topic.put("author_link", td.select("a").eq(1).attr("href").replace(extraURL, ""));
- 					topicinfo.setPoster(td.select("a").eq(1).text());
- 					
+ 					if (topictype == 1)
+ 						td.select("a").eq(1).remove();
+ 					if (topictype == 2)
+ 						topicinfo.setPoster(td.select("td").first().text());
+ 					else
+ 						topicinfo.setPoster(td.select("a").eq(1).text());
  					topicinfo.setPostcount(td.select("td").eq(2).text());
  					
  					
@@ -343,6 +344,14 @@ public class TopicList extends GDActivity{
  				
  			}catch (NullPointerException e){
  				Log.v(LOG, "Must Relog");
+ 				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
+ 				
+     			Intent intent = new Intent(TopicList.this, Login.class);
+     			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+     			startActivity(intent);
+ 			}
+ 			catch (IndexOutOfBoundsException e) {
+ 				Log.v(LOG, "IndexException: Relogging");
  				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
  				
      			Intent intent = new Intent(TopicList.this, Login.class);

@@ -39,6 +39,7 @@ public class BoardList extends GDListActivity{
 		
 		b.putString("URL",boardvalues[boardid]);
 		b.putBoolean("postable", true);
+		b.putInt("type", 3);
 		b.putInt("page", 1);
 		myIntent.putExtras(b);
 		startActivity(myIntent);

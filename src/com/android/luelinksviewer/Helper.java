@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -125,61 +126,6 @@ public class Helper {
 		return d;
 	}	
 	
-	public ArrayList<Message> ParseMessages(String Address) throws URISyntaxException, ClientProtocolException, IOException {
-		ArrayList<Message> MessageList = new ArrayList<Message>();
-		//Declare Variables
-		String html, extraURL;
-		Document doc;
-				
-		//Initiate Variables
-		extraURL = "//boards.endoftheinter.net";
-		doc = GetPage(Address);
-
-		
-		Elements postList = doc.select("#u0_1").select(".message-container");
-        
-		String extraUserUrl = "//endoftheinter.net/";
-		
-		for (Element msg : postList){
-			//Parse every post 
-			MessageList.add(parsePost(msg));
-			
-		}
-		return MessageList;
-	}
-	private Message parsePost(Element msg) {
-		Message post = new Message();
-		//Makes the user bar textview----------------USERBAR----------------
-		String userbar = msg.select(".message-top").first().text();		//Everything in the user bar.
-			//Remove unnecessary  | Filter | Message Detail | Quote  from userbar
-		
-		Elements remove = msg.select(".message-top").first().select("a");
-		remove.remove(0);
-		
-		for (Element e : remove){
-			userbar = userbar.replace(e.text(), "");
-		}
-		
-		userbar = userbar.replace(" |  |  | ", "");	
-		
-		Log.v(LOG, userbar);
-		
-		
-		return post;
-		
-	}
-	public Bitmap drawable_from_url(String Address) throws java.net.MalformedURLException, java.io.IOException {
-	    Bitmap x;
-
-	    HttpURLConnection connection = (HttpURLConnection)new URL(Address) .openConnection();
-
-	    connection.connect();
-	    InputStream input = connection.getInputStream();
-
-	    x = BitmapFactory.decodeStream(input);
-	    return x;
-	}
-	
 	public static DefaultHttpClient getTolerantClient() {
 	    DefaultHttpClient client = new DefaultHttpClient();
 	    SSLSocketFactory sslSocketFactory = (SSLSocketFactory) client
@@ -190,6 +136,25 @@ public class Helper {
 	        sslSocketFactory.setHostnameVerifier(new MyVerifier(delegate));
 	    }
 	    return client;
+	}
+	
+	public void SubmitPoll (int index, String poll) throws IOException {
+		//TODO: Submit the poll proper
+		HttpPost post = new HttpPost("http://www.endoftheinter.net/poll.php");
+		String vote = "v"+Integer.toString(index);
+		// Add your data
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("vote", vote));
+        nameValuePairs.add(new BasicNameValuePair("poll", poll));
+        nameValuePairs.add(new BasicNameValuePair("go", "Vote%21"));
+        
+        post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        
+        // Execute HTTP Post Request
+		HttpResponse response = client.execute(post);
+		HttpEntity entity = response.getEntity();
+		
+		entity.consumeContent();
 	}
 }
 

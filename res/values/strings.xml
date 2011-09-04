@@ -3,6 +3,12 @@
     <string name="hello">You have reached the end of the internet. Go away. Or login. I\'m a textview, not a cop.</string>
     <string name="app_name">Luelinks Viewer</string>
     
+    <!-- Topic List Board Types -->
+    <integer name="ToM">0</integer>
+    <integer name="tagged">1</integer>
+    <integer name="posted">2</integer>
+    <integer name="board">3</integer>
+    
     <!-- Topic List Action Menu IDs -->
     <string name="post_topic">Post Topic</string>
     <string name="next_page">Next Page</string>
@@ -29,7 +35,7 @@
     <!-- Specialty Board URIs -->
     <string name="moment_uri">http://boards.endoftheinter.net/main.php</string>
     <string name="tagged_uri">https://boards.endoftheinter.net/showfavorites.php</string>
-    <string name="postedt_uri">https://boards.endoftheinter.net/history.php</string>
+    <string name="posted_uri">https://boards.endoftheinter.net/history.php</string>
     
     <!-- Board Names / IDs-->
     <string-array name="boardlist">
