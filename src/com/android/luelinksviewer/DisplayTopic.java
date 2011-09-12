@@ -1,11 +1,14 @@
 package com.android.luelinksviewer;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
@@ -58,7 +61,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 	private LinearLayout layout;
 	private ScrollView scrollview;
 	private ListView messagelist;
-
+	
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//Define Variables
@@ -124,7 +127,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     private OnQuickActionClickListener mActionListener = new OnQuickActionClickListener() {
     	public void onQuickActionClicked(QuickActionWidget widget, int position) {
     		try {
-    			Log.v(LOG, Integer.toString(position));
 	    		switch (position) {
 	    			case 0:
 	    				Log.v(LOG, Integer.toString(position));
@@ -223,8 +225,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     }
 
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
-    	Log.v(LOG, "MessageList: " + messagelist.toString());
-    	Log.v(LOG, "listView: " + listView.toString());
         if (messagelist == listView) {
         	Log.v(LOG, "GREAT SUCCSES");
             searchAsyncImageViews(listView, scrollState == OnScrollListener.SCROLL_STATE_FLING);
@@ -377,84 +377,134 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			
  		}
  		private void GetBody(Elements msg) {
- 			ArrayList<String> images = new ArrayList<String>();
- 			try {
- 				//Removes quotes from the main message
- 				Elements quote = msg.select(".quoted-message");
- 				if (!quote.isEmpty()){
- 					//Get quotes and add them to the Layout
- 					Whitelist wlist = new Whitelist();
- 					wlist.addTags("br", "img");
- 					String clean = Jsoup.clean(quote.html(), wlist);
- 					String[] parts = clean.split("we t43un t5sunsrnu4sy63abt32vf2w3r9u2-=p2vo.t");
- 					for (String x : parts){
- 						Log.v("Quoted String parts", x + " ");
- 						//Add Quoted TextView
- 						createQuotePost(x.replace("<br />", "").replace("<span>", "").replace("</span>", ""));
- 					}
- 					msg.select(".quoted-message").remove();
- 				}
- 				
- 			}catch (NullPointerException e) { e.printStackTrace(); }
- 			
- 			
- 			Whitelist wlist = new Whitelist();
- 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
- 			
- 			String clean = Jsoup.clean(msg.html(), wlist);
- 			
- 			images.clear();
- 			for (Element i : msg.select("a[imgsrc]")){
- 				//Get the images in order they were posted
- 				images.add(i.attr("imgsrc"));
- 				Log.v("Image url", i.attr("src"));
- 			}
- 			
- 			String[] parts = clean.split("<br />");
- 			
- 			int y = 0;
- 			for (String post : parts){
- 				String text = post.replace("<br />", "").replace("<span>", "")
- 						.replace("</span>", "").replace("&lt;", "<").replace("&gt;", ">")
- 						.replace("<a>", "").replace("</a>", "").replace("&quot;", "''").trim();
- 				
- 				if (text.contains("<a imgsrc")){
- 					//If an image is here, post it from the list of captured image urls
- 					Log.v("FOUND", "Image Found");
- 					createImage(images.get(y));
- 					y++;
- 					
- 				}else if (post.contains("<span>") && post.contains("&lt;") && post.contains("&gt;")){
- 					//If thre's a spoiler in the text
- 					
- 					Log.v("FOUND", "Spoiler Found");
- 					
- 					createPost(text);
- 					
- 					//TODO: Add a view to the spoiler. Make the button use a .addview(VIEW, INDEX) to show where to add
- 					//the view
- 					
- 					
- 					/*for (Element sp : spoilerDoc.select("body")){
- 						Log.v("SpoilFor", sp.html());
- 						
- 						if (sp.html().contains("<span>") && sp.html().contains("&lt;")){
- 							//Create a special spoiler
- 							createSpoiler(sp.html());
- 							
- 						}else {
- 							//Sets textview with post body
- 							createPost(sp.html().replace("<br />", "").replace("<span>", "")
- 									.replace("</span>", "").replace("&lt;", "<").replace("&gt;", ">"));
- 							
- 						}
- 					}*/
- 				}else
- 					createPost(text);
- 			}
+ 			//TODO: Properly remove the message so it can be posted
+			Elements quotes = msg.select(".quoted-message");
+			if (!quotes.isEmpty()) {
+				Element firstQuotedMessage = quotes.first();
+
+				List<Node> siblings = firstQuotedMessage.siblingNodes();
+				List<Node> elementsBetween = new ArrayList<Node>();
+				Element currentQuotedMessage = firstQuotedMessage;
+				for (int i = 1; i < siblings.size(); i++) {
+		            Node sibling = siblings.get(i);
+
+		            // see if this Node is a quoted message
+		            if (!isQuotedMessage(sibling)) {
+		                elementsBetween.add(sibling);
+		            } else {		         
+		            	processElementsBetween(currentQuotedMessage, elementsBetween);
+		                currentQuotedMessage = (Element) sibling;
+		                elementsBetween.clear();
+		            }
+		        }
+		        if (!elementsBetween.isEmpty()) {
+		        	processElementsBetween(currentQuotedMessage, elementsBetween);
+		        }
+			}
+			else {
+				try {
+					ArrayList<String> images = new ArrayList<String>();
+					Element ele = msg.select(".message").first();
+					for (Element img : ele.select("a[imgsrc]")) {
+						images.add(img.attr("imgsrc"));
+						
+					}
+					
+					
+					
+					
+					getMessage(images, ele);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
  		}
- 		private void getMessage() {
+ 		private boolean isQuotedMessage(Node node) {
+ 	        if (node instanceof Element) {
+ 	            Element el = (Element) node;
+ 	            return "div".equals(el.tagName()) && el.hasClass("quoted-message");
+ 	        }
+ 	        return false;
+ 	    }
+ 		private void processElementsBetween(Element quote, List<Node> elementsBetween) {
+ 			createQuote(quote, 5);
+ 			ArrayList<String> images = new ArrayList<String>();
+ 			List<Element> imgs = filterImages(elementsBetween);
+ 			for (Element img : imgs) {
+ 				//Get the images in order they were posted
+ 				images.add(img.attr("imgsrc"));
+ 			}
+ 			for (Node node : elementsBetween) {
+ 				getMessage(images, node);
+ 			}
+		}
+ 		
+ 		private List<Element> filterImages(List<Node> nodes) {
+ 			String tagName = "img";
+ 	        List<Element> els = new ArrayList<Element>();
+ 	        for (Iterator<Node> it = nodes.iterator(); it.hasNext();) {
+ 	            Node n = it.next();
+ 	            if (n instanceof Element) {
+ 	                Element el = (Element) n;
+ 	                if (el.tagName().equals(tagName)) {
+ 	                    els.add(el);
+ 	                }
+ 	            }
+ 	        }
+ 	        return els;
+ 	    }
+
+
+ 		private void getMessage(ArrayList<String> images, Node msg) {
  			
+ 			try {
+ 				Whitelist wlist = new Whitelist();
+ 	 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
+ 	 			
+ 	 			String clean = Jsoup.clean(msg.toString(), wlist);
+ 	 			
+ 	 			String[] parts = clean.split("<br />");
+ 	 			
+ 	 			int y = 0;
+ 	 			for (String post : parts){
+ 	 				String text = post.replace("<br />", "").replace("<span>", "")
+ 	 						.replace("</span>", "").replace("&lt;", "<").replace("&gt;", ">")
+ 	 						.replace("<a>", "").replace("</a>", "").replace("&quot;", "''").trim();
+ 	 				
+ 	 				if (text.contains("<a imgsrc")){
+ 	 					//If an image is here, post it from the list of captured image urls
+ 	 					createImage(images.get(y));
+ 	 					y++;
+ 	 					
+ 	 				}else if (post.contains("<span>") && post.contains("&lt;") && post.contains("&gt;")){
+ 	 					//If thre's a spoiler in the text
+ 	 					createPost(text);
+ 	 					
+ 	 					//TODO: Add a view to the spoiler. Make the button use a .addview(VIEW, INDEX) to show where to add
+ 	 					//the view
+ 	 					
+ 	 					
+ 	 					/*for (Element sp : spoilerDoc.select("body")){
+ 	 						Log.v("SpoilFor", sp.html());
+ 	 						
+ 	 						if (sp.html().contains("<span>") && sp.html().contains("&lt;")){
+ 	 							//Create a special spoiler
+ 	 							createSpoiler(sp.html());
+ 	 							
+ 	 						}else {
+ 	 							//Sets textview with post body
+ 	 							createPost(sp.html().replace("<br />", "").replace("<span>", "")
+ 	 									.replace("</span>", "").replace("&lt;", "<").replace("&gt;", ">"));
+ 	 							
+ 	 						}
+ 	 					}*/
+ 	 				}else
+ 	 					createPost(text);
+ 	 			}
+ 			}
+ 			catch (Exception e) { e.printStackTrace(); } 			
  		}
  		private void createPost(String string) {
  			//Creates a new textview for the post body text
@@ -471,9 +521,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  		}
  		
  		private void createImage(String i) {
- 			//Creates an asyncimageview, adds to overall layout
- 			Log.v("createImage", i);
- 			
+ 			//Creates an asyncimageview, adds to overall layout 			
  			AsyncImageView img = new AsyncImageView(DisplayTopic.this);
  			img.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
  			//img.setBackgroundColor(Color.rgb(179, 223, 252));
@@ -500,18 +548,90 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			//layout.addView(tvPostBody);
  		}
  		
- 		private void createQuotePost(String string) {
- 			//Creates a new textview for the quote post body text
- 			//Adds it to the overall layout
+ 		private void createQuote(Element quote, int margin) {
  			
- 			TextView tvQuoteBody = new TextView(DisplayTopic.this);
- 			tvQuoteBody.setText(string);
- 			tvQuoteBody.setAutoLinkMask(Linkify.ALL);
- 			tvQuoteBody.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
- 			tvQuoteBody.setBackgroundColor(Color.rgb(169, 169, 169));
- 			tvQuoteBody.setTextColor(Color.BLACK);
- 			tvQuoteBody.setPadding(15, 5, 5, 5);
- 			layout.addView(tvQuoteBody);
+ 			//Declare Variables
+ 			LinearLayout.LayoutParams headerLayout;
+ 			TextView Header;
+ 			Element quoteHead, nextQuote;
+ 			Elements moreQuotes; 			
+ 			
+ 			//Initiate Variables
+ 			headerLayout = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+ 			headerLayout.setMargins(margin, 2, 0, 2);
+ 			Header = new TextView(DisplayTopic.this);
+ 			nextQuote = null;
+ 			
+ 			//Grab header. Remove quote and header
+ 			Log.v("location", "Attempting to remove quotes");
+ 			quoteHead = quote.select(".message-top").first();
+ 			try {
+ 				Log.v("location", "Entering Try Statement");
+	 			quote.select(".message-top").first().remove();
+ 			}
+ 			catch (Exception e) { e.printStackTrace(); } 	
+ 			Log.v("location", "Removed Quotes");
+ 			
+ 			//Get next quotes
+ 			moreQuotes = quote.select(".quoted-message");
+ 			//nextQuote = quote.select(".quoted-message").get(2);
+ 			Log.v("imgs", "moreQuotes: " + moreQuotes.toString());
+ 			if (moreQuotes.size() > 1) {
+ 				//FIX BELOW
+ 				nextQuote = quote.select(".quoted-message").get(1);
+ 				quote.select(".quoted-message").get(1).remove();
+ 			}
+ 			else
+ 				Log.v("Image url", "Tiny Quote");
+ 			
+ 			//Set Layouts
+ 			Header.setBackgroundColor(Color.rgb(104, 150, 213));
+ 			Header.setPadding(15, 5, 5, 0);
+ 			Header.setTextColor(Color.BLACK);
+ 			Header.setLayoutParams(headerLayout);
+ 			//Set Text for header
+ 			Header.setText(quoteHead.text());
+ 			Header.setTextSize(10);
+ 			
+ 			//Set Text for Quote
+ 			Whitelist wlist = new Whitelist();
+			wlist.addTags("br", "img");
+			String clean = Jsoup.clean(quote.html(), wlist);
+			String[] parts = clean.split("we t43un t5sunsrnu4sy63abt32vf2w3r9u2-=p2vo.t");
+			
+			//Add Header, loop for each msg to add
+			layout.addView(Header);
+			
+			if(moreQuotes.size() > 1) {
+ 				try {
+ 					createQuote(nextQuote, margin*2);
+ 				}
+ 				catch (Exception e) {
+ 					e.printStackTrace();
+ 				}
+ 				Log.v(LOG, "DOUBLE QUOTE ADDED");
+ 			}
+			else {
+				Log.v("boolean", "TinyQuote");
+			}
+			
+			for (String x : parts){
+				TextView Post = new TextView(DisplayTopic.this);
+				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+				params.setMargins(margin, 2, 0, 2);
+				x = x.replace("<br />", "").replace("<span>", "").replace("</span>", "");
+				
+				Post.setBackgroundColor(Color.rgb(221, 227, 235));
+	 			Post.setPadding(15, 0, 5, 0);
+	 			Post.setLayoutParams(params);
+	 			Post.setTextColor(Color.BLACK);
+	 			
+	 			Post.setText(x);
+	 			Post.setAutoLinkMask(Linkify.ALL);
+	 			
+				layout.addView(Post);
+			}
+			
  			
  		}
  	}
