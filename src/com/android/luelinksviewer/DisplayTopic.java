@@ -306,7 +306,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 			
 			//Get body HTML
 			body = msg.select(".message");
-			messageData.setMessage(body);
 			
 			//Get Avatar
 			Elements avatar = msg.select(".userpic-holder").select("script");
@@ -377,21 +376,37 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			
  		}
  		private void GetBody(Elements msg) {
- 			//TODO: Properly remove the message so it can be posted
-			Elements quotes = msg.select(".quoted-message");
+ 			//Declare Variables
+ 			int brpos, quotepos;
+ 			Elements quotes;
+ 			
+ 			
+			quotes = msg.select(".quoted-message");
+			
 			if (!quotes.isEmpty()) {
+				//Check for text before the quoted message
+				
+				brpos = msg.toString().indexOf("<br />");
+	 			quotepos = msg.toString().indexOf("<div class");
+				if (brpos < quotepos)
+					quotes = RemoveBeginText(msg);
 				Element firstQuotedMessage = quotes.first();
-
-				List<Node> siblings = firstQuotedMessage.siblingNodes();
+				List<Node> siblings = null;
+				siblings = firstQuotedMessage.siblingNodes();
+				Log.v(LOG, "Set Siblings");
 				List<Node> elementsBetween = new ArrayList<Node>();
 				Element currentQuotedMessage = firstQuotedMessage;
+				Log.v(LOG, "Getting Inbetweens: " + siblings.toString());
 				for (int i = 1; i < siblings.size(); i++) {
 		            Node sibling = siblings.get(i);
-
 		            // see if this Node is a quoted message
 		            if (!isQuotedMessage(sibling)) {
 		                elementsBetween.add(sibling);
-		            } else {		         
+		                //Log.v("LOG", "A Sibling:");
+		                //Log.v("LOG", sibling.toString());
+		            } else {
+		            	//TODO: There is a bug here
+		            	Log.v("LOG", "Count: " + Integer.toString(elementsBetween.size()));
 		            	processElementsBetween(currentQuotedMessage, elementsBetween);
 		                currentQuotedMessage = (Element) sibling;
 		                elementsBetween.clear();
@@ -409,17 +424,41 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 						images.add(img.attr("imgsrc"));
 						
 					}
-					
-					
-					
-					
-					getMessage(images, ele);
+					Whitelist wlist = new Whitelist();
+	 	 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
+	 	 			String clean = Jsoup.clean(msg.toString(), wlist);
+					getMessage(images, clean.split("<br />"));
 				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+				catch (Exception e) {e.printStackTrace();}
 			}
 			
+ 		}
+ 		private Elements RemoveBeginText(Elements msg) {
+ 			int startpos, endpos;
+			String message, newmsg;
+			ArrayList<String> images = new ArrayList<String>();
+			Document messageDoc, newmsgDoc;
+			
+			startpos = msg.toString().indexOf("class=\"message\">") + 16;
+			endpos = msg.toString().indexOf("<div");
+			message = msg.toString().substring(startpos, endpos);
+			newmsg = msg.toString().replaceFirst(message, " ");
+			
+			messageDoc = Jsoup.parseBodyFragment(message);
+			newmsgDoc = Jsoup.parseBodyFragment(newmsg);
+			
+			//Post the pre-quote data
+			for (Element img : messageDoc.select("a[imgsrc]")) {
+				images.add(img.attr("imgsrc"));
+				
+			}
+			Whitelist wlist = new Whitelist();
+ 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
+ 			String clean = Jsoup.clean(message, wlist);
+			getMessage(images, clean.split("<br />"));
+			
+			//Get the new msg, with the initial post removed
+ 			return newmsgDoc.select(".quoted-message");
  		}
  		private boolean isQuotedMessage(Node node) {
  	        if (node instanceof Element) {
@@ -437,7 +476,10 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  				images.add(img.attr("imgsrc"));
  			}
  			for (Node node : elementsBetween) {
- 				getMessage(images, node);
+ 				Whitelist wlist = new Whitelist();
+ 	 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
+ 	 			String clean = Jsoup.clean(node.toString(), wlist);
+				getMessage(images, clean.split("<br />"));
  			}
 		}
  		
@@ -457,16 +499,9 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  	    }
 
 
- 		private void getMessage(ArrayList<String> images, Node msg) {
+ 		private void getMessage(ArrayList<String> images, String[] parts) {
  			
  			try {
- 				Whitelist wlist = new Whitelist();
- 	 			wlist.addTags("br", "img", "a").addAttributes(":all", "imgsrc");
- 	 			
- 	 			String clean = Jsoup.clean(msg.toString(), wlist);
- 	 			
- 	 			String[] parts = clean.split("<br />");
- 	 			
  	 			int y = 0;
  	 			for (String post : parts){
  	 				String text = post.replace("<br />", "").replace("<span>", "")
@@ -504,7 +539,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  	 					createPost(text);
  	 			}
  			}
- 			catch (Exception e) { e.printStackTrace(); } 			
+ 			catch (Exception e) { e.printStackTrace(); } 
  		}
  		private void createPost(String string) {
  			//Creates a new textview for the post body text
@@ -563,26 +598,22 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			nextQuote = null;
  			
  			//Grab header. Remove quote and header
- 			Log.v("location", "Attempting to remove quotes");
  			quoteHead = quote.select(".message-top").first();
  			try {
- 				Log.v("location", "Entering Try Statement");
+ 				//TODO: FIX THE NULL POINTER EXCEPTION HERE:
+ 				
 	 			quote.select(".message-top").first().remove();
  			}
- 			catch (Exception e) { e.printStackTrace(); } 	
- 			Log.v("location", "Removed Quotes");
+ 			catch (Exception e) { e.printStackTrace(); }
  			
  			//Get next quotes
  			moreQuotes = quote.select(".quoted-message");
- 			//nextQuote = quote.select(".quoted-message").get(2);
- 			Log.v("imgs", "moreQuotes: " + moreQuotes.toString());
  			if (moreQuotes.size() > 1) {
  				//FIX BELOW
  				nextQuote = quote.select(".quoted-message").get(1);
  				quote.select(".quoted-message").get(1).remove();
+ 				createQuote(nextQuote, margin*2);
  			}
- 			else
- 				Log.v("Image url", "Tiny Quote");
  			
  			//Set Layouts
  			Header.setBackgroundColor(Color.rgb(104, 150, 213));
@@ -601,20 +632,7 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 			
 			//Add Header, loop for each msg to add
 			layout.addView(Header);
-			
-			if(moreQuotes.size() > 1) {
- 				try {
- 					createQuote(nextQuote, margin*2);
- 				}
- 				catch (Exception e) {
- 					e.printStackTrace();
- 				}
- 				Log.v(LOG, "DOUBLE QUOTE ADDED");
- 			}
-			else {
-				Log.v("boolean", "TinyQuote");
-			}
-			
+				
 			for (String x : parts){
 				TextView Post = new TextView(DisplayTopic.this);
 				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);

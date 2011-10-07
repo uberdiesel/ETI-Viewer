@@ -2,6 +2,7 @@ package com.android.luelinksviewer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import greendroid.app.GDListActivity;
@@ -36,7 +37,7 @@ public class BoardList extends GDListActivity{
 			boardid = boardid-1;
 		if (boardid > 9)
 			boardid = boardid-1;
-		
+		Log.v("boolean", "board: " + boardvalues[boardid]);
 		b.putString("URL",boardvalues[boardid]);
 		b.putBoolean("postable", true);
 		b.putInt("type", 3);

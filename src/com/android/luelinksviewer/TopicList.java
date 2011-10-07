@@ -283,15 +283,35 @@ public class TopicList extends GDActivity{
  			//UI Thread, what to do after
  			String extraUrl = "//boards.endoftheinter.net";
  			try {
+ 				//Declare Variables
+ 				Elements tables, topics, infobar;
+ 				Element pc;
+ 				
  				if(topictype == 0)
  					setTitle("Topics of the Moment");
  				else
  					setTitle(Integer.toString(page) + ": " + doc.select("h1").text());
  				if(topictype > 0) {
- 	 				Element pc = doc.select("div.infobar").first().select("span").first();
+ 					//Check for a sub-board info-bar and remove it.
+ 					infobar = doc.select("div.infobar");
+ 					int y = 0;
+ 					//pc = infobar.get(y).select("span").first();
+ 					while (!infobar.get(y).toString().contains("span")) {
+ 						y++;
+ 					}
+ 					pc = infobar.get(y).select("span").first();
  	 	 			pagecount = Integer.parseInt(pc.text());
  	 			}
- 				Elements topics = doc.select("table").select("tr");
+ 				
+ 				//Check for a sub board and remove it.
+ 				tables = doc.select("table");
+ 				if (tables.size() > 1) {
+ 					Log.v("boolean", "IM IN MART");
+ 					tables.remove(0); 
+ 				}
+ 				topics = tables.select("tr");
+ 				
+ 				//Remove the header from each table
  				topics.remove(0);
  				if(topictype == 0)
  					topics.remove(0); //Remove the ToM header from being added as well.
@@ -349,15 +369,15 @@ public class TopicList extends GDActivity{
      			Intent intent = new Intent(TopicList.this, Login.class);
      			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
      			startActivity(intent);
- 			}
- 			catch (IndexOutOfBoundsException e) {
- 				Log.v(LOG, "IndexException: Relogging");
+ 			}catch (IndexOutOfBoundsException e) {
+ 				Log.v(LOG, "Must Relog");
  				Toast.makeText(getApplicationContext(), "Not logged in", Toast.LENGTH_SHORT).show();
  				
      			Intent intent = new Intent(TopicList.this, Login.class);
      			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
      			startActivity(intent);
  			}
+ 			
 
  		}
  		
