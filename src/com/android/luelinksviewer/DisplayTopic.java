@@ -51,7 +51,6 @@ import greendroid.widget.QuickActionWidget.OnQuickActionClickListener;
 
 public class DisplayTopic extends GDActivity implements OnScrollListener{
 	private ArrayList<Message> MessageList = new ArrayList<Message>();
-	private String LOG = "DisplayTopic";
 	private String address, title;
 	private int page, pagecount;
 	private QuickActionWidget mGrid;
@@ -129,7 +128,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
     		try {
 	    		switch (position) {
 	    			case 0:
-	    				Log.v(LOG, Integer.toString(position));
 	    				//TODO: Post Message
 	    				break;
 	    			case 1:
@@ -226,7 +224,6 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
         if (messagelist == listView) {
-        	Log.v(LOG, "GREAT SUCCSES");
             searchAsyncImageViews(listView, scrollState == OnScrollListener.SCROLL_STATE_FLING);
         }
     }
@@ -270,8 +267,11 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			
 			try {
 				Elements postList = doc.select("#u0_1").select(".message-container");
-				for (Element msg : postList){
-					parseMessage(msg);
+				for (Element post : postList){
+					MessageList.add(new Message(post, DisplayTopic.this));
+				}
+				for (Message msg : MessageList) {
+					GenerateMessage(msg);
 				}
 			}catch (NullPointerException e){ }
 			
@@ -279,49 +279,11 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 			pd.dismiss();
 			//ba.notifyDataSetChanged();
 		}
- 		private void parseMessage(Element msg) {
- 			//Declare Variables
- 			String author, date, avatarurl;
- 			Elements body;
- 			Element header;
- 			Message messageData;
- 			
- 			//Initiate Variables
- 			author = null;
- 			date = null;
- 			avatarurl = null;
- 			messageData = new Message();
- 			
- 			header = msg.select("div.message-top").first();
-	    	// Parse Out Header Data
-	    	String split = "[|]";
-	    	String[] splithead = header.text().split(split);
-	    	String posthead = splithead[0].trim();
-	    	String datehead = splithead[1].trim();
-	    	datehead = datehead.substring(8);
-	    	author = posthead.substring(6);
-	    	date = datehead.substring(0, datehead.length()-6);
-	    	//messageData.setAuthor(author);
-			//messageData.setDate(date);
-			
-			//Get body HTML
-			body = msg.select(".message");
-			
-			//Get Avatar
-			Elements avatar = msg.select(".userpic-holder").select("script");
-			
-			if (!avatar.isEmpty()) {
-				String splitter = "[,]";
-				String datas[] = avatar.toString().split(splitter);
-				String a = datas[1].replace("\\" , "").replace("\"" , "");
-				avatarurl = "http:" + a.trim();
-				messageData.setAvatarUrl(avatarurl);
-			}
-			GetHeader(author, date, avatarurl);
-			GetBody(body);
-			//MessageList.add(messageData);
+ 		private void GenerateMessage(Message msg) {
+ 			GenerateHeader(msg.getAuthor(), msg.getDate(), msg.getAvatarUrl());
+ 			layout.addView(msg.getMessage());
  		}
- 		private void GetHeader(String a, String d, String avatarurl) {
+ 		private void GenerateHeader(String a, String d, String avatarurl) {
  			//Declare Views
  			RelativeLayout header;
  			AsyncImageView avatar;
@@ -375,6 +337,8 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
  			layout.addView(header);
  			
  		}
+ 		
+
  		private void GetBody(Elements msg) {
  			//Declare Variables
  			int brpos, quotepos;
@@ -393,10 +357,8 @@ public class DisplayTopic extends GDActivity implements OnScrollListener{
 				Element firstQuotedMessage = quotes.first();
 				List<Node> siblings = null;
 				siblings = firstQuotedMessage.siblingNodes();
-				Log.v(LOG, "Set Siblings");
 				List<Node> elementsBetween = new ArrayList<Node>();
 				Element currentQuotedMessage = firstQuotedMessage;
-				Log.v(LOG, "Getting Inbetweens: " + siblings.toString());
 				for (int i = 1; i < siblings.size(); i++) {
 		            Node sibling = siblings.get(i);
 		            // see if this Node is a quoted message
